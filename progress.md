@@ -3,11 +3,11 @@
 The agent updates this file after every task: tick the box, add a one-line note, and set "Next task".
 
 **Current branch:** feature/auth-jwt
-**Next task:** F1-T2
+**Next task:** F1-T3
 
 ## Feature 1: feature/auth-jwt
 - [x] F1-T1 User model + register/login endpoints
-- [ ] F1-T2 JWT cookie, protect middleware, logout, me
+- [x] F1-T2 JWT cookie, protect middleware, logout, me
 - [ ] F1-T3 Frontend AuthContext + axios client
 - [ ] F1-T4 Login/Signup pages + protected routes
 
@@ -31,3 +31,4 @@ The agent updates this file after every task: tick the box, add a one-line note,
 
 ## Notes / decisions
 - F1-T1: Created User Mongoose model and implemented POST /api/auth/register and POST /api/auth/login with 10-round bcrypt hashing and input validation.
+- F1-T2: Integrated cookie-parser, JWT issuance in HTTP-only cookies on register/login, auth protect middleware, POST /api/auth/logout, and GET /api/auth/me.

@@ -2,16 +2,39 @@
 
 /**
  * Authentication Controller
- * Handles user registration and login requests.
- * Uses bcrypt for 10-round password hashing and returns user objects without exposing password hashes.
+ * Handles user registration, login, logout, and session profile retrieval.
+ * Issues signed JSON Web Tokens (JWT) stored in HTTP-only cookies for secure
+ * virtual identity management.
  */
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';
 
 /**
+ * Helper to generate a 1-day JWT for authenticated sessions
+ */
+const generateToken = (userId) => {
+  return jwt.sign(
+    { id: userId },
+    process.env.JWT_SECRET || 'banana_jwt_secret_dev_key_2026',
+    { expiresIn: '1d' }
+  );
+};
+
+/**
+ * Cookie options ensuring security against XSS attacks via httpOnly flag
+ */
+const getCookieOptions = () => ({
+  httpOnly: true,
+  sameSite: 'lax',
+  secure: process.env.NODE_ENV === 'production',
+  maxAge: 24 * 60 * 60 * 1000, // 1 day
+});
+
+/**
  * Register a new user
- * Validates input, verifies unique email and username, hashes password, and saves the user.
- * HTTP 400 for invalid inputs, 409 for duplicate conflicts, 201 on success.
+ * Validates input, hashes password with bcrypt, saves user to MongoDB,
+ * signs a JWT, and sets it in an HTTP-only cookie.
  */
 export const register = async (req, res) => {
   try {
@@ -46,7 +69,7 @@ export const register = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
     const trimmedUsername = username.trim();
 
-    // Check for existing duplicates
+    // Check for duplicate credentials
     const existingEmail = await User.findOne({ email: normalizedEmail });
     if (existingEmail) {
       return res.status(409).json({
@@ -65,14 +88,17 @@ export const register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Create and save new user
+    // Persist new user in MongoDB
     const user = await User.create({
       username: trimmedUsername,
       email: normalizedEmail,
       passwordHash,
     });
 
-    // Return created user without passwordHash
+    // Sign JWT and set in HTTP-only cookie
+    const token = generateToken(user._id);
+    res.cookie('token', token, getCookieOptions());
+
     return res.status(201).json({
       message: 'User registered successfully',
       user: {
@@ -92,14 +118,12 @@ export const register = async (req, res) => {
 
 /**
  * Login user
- * Verifies credentials by matching lowercase email and comparing bcrypt password hashes.
- * HTTP 400 for missing inputs, 401 for invalid credentials, 200 on success.
+ * Authenticates user credentials, generates JWT, and sets it in HTTP-only cookie.
  */
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Input validation
     if (!email || !password) {
       return res.status(400).json({
         message: 'Email and password are required',
@@ -108,7 +132,6 @@ export const login = async (req, res) => {
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    // Locate user by email
     const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(401).json({
@@ -116,7 +139,6 @@ export const login = async (req, res) => {
       });
     }
 
-    // Verify password against stored bcrypt hash
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) {
       return res.status(401).json({
@@ -124,7 +146,10 @@ export const login = async (req, res) => {
       });
     }
 
-    // Return user without passwordHash (cookie is added in F1-T2)
+    // Sign JWT and set in HTTP-only cookie
+    const token = generateToken(user._id);
+    res.cookie('token', token, getCookieOptions());
+
     return res.status(200).json({
       message: 'Logged in successfully',
       user: {
@@ -140,4 +165,30 @@ export const login = async (req, res) => {
       message: 'Internal server error during login',
     });
   }
+};
+
+/**
+ * Logout user
+ * Clears the HTTP-only 'token' cookie to invalidate the client session.
+ */
+export const logout = (req, res) => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+  });
+
+  return res.status(200).json({
+    message: 'Logged out successfully',
+  });
+};
+
+/**
+ * Get current authenticated user profile
+ * Handled after protect middleware attaches req.user.
+ */
+export const getMe = (req, res) => {
+  return res.status(200).json({
+    user: req.user,
+  });
 };

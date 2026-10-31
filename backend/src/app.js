@@ -2,27 +2,35 @@
 
 /**
  * Express Application Setup
- * Configures global middlewares (CORS, JSON body parsing) and mounts API routes.
+ * Configures global middlewares:
+ * - CORS with credentials enabled for HTTP-only cookies
+ * - JSON body parser
+ * - Cookie parser for reading incoming JWT cookies
+ * Mounts routes under /api/auth.
  */
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.routes.js';
 
 const app = express();
 
-// Middleware
+// Enable CORS with credentials for cookie exchange
 app.use(
   cors({
     origin: process.env.CLIENT_URL || 'http://localhost:5173',
     credentials: true,
   })
 );
-app.use(express.json());
 
-// API Routes
+// Body and cookie parsing middleware
+app.use(express.json());
+app.use(cookieParser());
+
+// Mount authentication routes
 app.use('/api/auth', authRoutes);
 
-// Root route for sanity check
+// Health sanity check endpoint
 app.get('/', (req, res) => {
   res.json({ message: 'Banana Puzzle Game API is running' });
 });
