@@ -2,8 +2,8 @@
 
 The agent updates this file after every task: tick the box, add a one-line note, and set "Next task".
 
-**Current branch:** feature/results-leaderboard
-**Next task:** F4-T4
+**Current branch:** main
+**Next task:** None (All features completed)
 
 ## Feature 1: feature/auth-jwt
 - [x] F1-T1 User model + register/login endpoints
@@ -27,7 +27,7 @@ The agent updates this file after every task: tick the box, add a one-line note,
 - [x] F4-T1 Result and history endpoints
 - [x] F4-T2 Results page
 - [x] F4-T3 Leaderboard endpoint
-- [ ] F4-T4 Leaderboard page + navbar
+- [x] F4-T4 Leaderboard page + navbar
 
 ## Notes / decisions
 - F1-T1: Created User Mongoose model and implemented POST /api/auth/register and POST /api/auth/login with 10-round bcrypt hashing and input validation.
@@ -45,3 +45,4 @@ The agent updates this file after every task: tick the box, add a one-line note,
 - F4-T1: Implemented protected GET /api/game/:id/result (owner-only, finished games only, per-round breakdown with revealed solutions) and GET /api/game/history (sorted newest first).
 - F4-T2: Built Results page at /results/:id displaying total score, correct count, per-round breakdown (puzzle image, user answer, verified solution, speed points) with green/red styling, and navigation to /game and /leaderboard.
 - F4-T3: Built MongoDB aggregation pipeline in controllers/leaderboard.controller.js and mounted GET /api/leaderboard returning top 10 players ranked by best score with games played, protecting user privacy.
+- F4-T4: Built Leaderboard page with top 10 player rankings, highlighted active user row, added Game and Leaderboard links to Navbar, and added 'My recent games' list on Game idle screen linking to /results/:id.

@@ -28,7 +28,7 @@
  * ============================================================================
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { DigitPad } from '../components/DigitPad';
@@ -47,9 +47,40 @@ export const Game = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState(null); // { show, correct, points, isTimeout }
   const [error, setError] = useState(null);
+  const [recentGames, setRecentGames] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   // Mutable ref to access latest submit function within keyboard and timeout listeners
   const submitHandlerRef = useRef(null);
+
+  /**
+   * Fetch user's recent finished games when on the idle screen
+   */
+  useEffect(() => {
+    let isMounted = true;
+    if (gameState === 'idle') {
+      const fetchHistory = async () => {
+        try {
+          setLoadingHistory(true);
+          const res = await client.get('/game/history');
+          if (isMounted) {
+            setRecentGames((res.data || []).slice(0, 5));
+          }
+        } catch (err) {
+          console.error('Failed to load recent games history:', err);
+        } finally {
+          if (isMounted) {
+            setLoadingHistory(false);
+          }
+        }
+      };
+
+      fetchHistory();
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [gameState]);
 
   /**
    * Start a new game session via POST /api/game/start
@@ -267,6 +298,70 @@ export const Game = () => {
             >
               Start Game
             </button>
+
+            {/* My Recent Games Section (last 5 finished games) */}
+            <div className="pt-6 border-t border-slate-800 text-left">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <span>📜</span> My Recent Games
+                </h2>
+                {recentGames.length > 0 && (
+                  <Link
+                    to="/leaderboard"
+                    className="text-xs text-yellow-400 hover:text-yellow-300 font-semibold"
+                  >
+                    View Leaderboard →
+                  </Link>
+                )}
+              </div>
+
+              {loadingHistory ? (
+                <div className="py-4 text-center text-xs text-slate-500">
+                  Loading recent games...
+                </div>
+              ) : recentGames.length === 0 ? (
+                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-center text-xs text-slate-400">
+                  No completed games yet. Press Start Game above to play your first challenge!
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {recentGames.map((game) => (
+                    <Link
+                      key={game.id || game._id}
+                      to={`/results/${game.id || game._id}`}
+                      className="flex items-center justify-between p-3 rounded-xl bg-slate-950/80 hover:bg-slate-800/80 border border-slate-800/90 hover:border-yellow-400/50 transition group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-lg">🍌</span>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-black font-mono text-yellow-400">
+                              {game.score} pts
+                            </span>
+                            <span className="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
+                              {game.correctCount}/{game.totalRounds || 5} Correct
+                            </span>
+                          </div>
+                          <span className="text-[10px] text-slate-500">
+                            {game.finishedAt
+                              ? new Date(game.finishedAt).toLocaleString(undefined, {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })
+                              : 'Completed'}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="text-xs text-slate-500 group-hover:text-yellow-400 transition font-bold">
+                        View Breakdown →
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 

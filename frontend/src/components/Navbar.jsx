@@ -5,7 +5,7 @@
  * Displays the application header brand, navigation links, and dynamic user controls.
  * Shows the logged-in user's username and Logout button, or Login/Signup buttons for guests.
  */
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export const Navbar = () => {
@@ -20,13 +20,44 @@ export const Navbar = () => {
   return (
     <header className="w-full bg-slate-900 border-b border-slate-800 text-slate-100">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Brand Link */}
-        <Link to="/game" className="flex items-center gap-2 hover:opacity-90 transition">
-          <span className="text-2xl" role="img" aria-label="banana">🍌</span>
-          <span className="font-extrabold text-lg tracking-tight text-white">
-            Banana <span className="text-yellow-400">Puzzle</span>
-          </span>
-        </Link>
+        {/* Brand & Main Navigation */}
+        <div className="flex items-center gap-6">
+          <Link to="/game" className="flex items-center gap-2 hover:opacity-90 transition">
+            <span className="text-2xl" role="img" aria-label="banana">🍌</span>
+            <span className="font-extrabold text-lg tracking-tight text-white">
+              Banana <span className="text-yellow-400">Puzzle</span>
+            </span>
+          </Link>
+
+          {user && (
+            <nav className="flex items-center gap-1 sm:gap-2 text-sm font-semibold">
+              <NavLink
+                to="/game"
+                className={({ isActive }) =>
+                  `px-3 py-1.5 rounded-lg transition ${
+                    isActive
+                      ? 'text-yellow-400 bg-slate-800'
+                      : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                  }`
+                }
+              >
+                Game
+              </NavLink>
+              <NavLink
+                to="/leaderboard"
+                className={({ isActive }) =>
+                  `px-3 py-1.5 rounded-lg transition ${
+                    isActive
+                      ? 'text-yellow-400 bg-slate-800'
+                      : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                  }`
+                }
+              >
+                Leaderboard
+              </NavLink>
+            </nav>
+          )}
+        </div>
 
         {/* User Navigation / Actions */}
         <div className="flex items-center gap-4">
