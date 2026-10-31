@@ -16,6 +16,7 @@ import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { Game } from './pages/Game';
 import { Results } from './pages/Results';
+import { Leaderboard } from './pages/Leaderboard';
 
 function App() {
   return (
@@ -43,6 +44,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Results />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/leaderboard"
+                element={
+                  <ProtectedRoute>
+                    <Leaderboard />
                   </ProtectedRoute>
                 }
               />

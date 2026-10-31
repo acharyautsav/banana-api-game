@@ -189,3 +189,83 @@ export const answerRound = async (req, res, next) => {
     next(error);
   }
 };
+
+/**
+ * Get finished game result
+ * Returns score, correct count, total rounds, and per-round breakdown.
+ * Because the game is finished, the secret solutions are now safely revealed to the player.
+ * Security: protected, owner-only, game must be in 'finished' status.
+ */
+export const getGameResult = async (req, res, next) => {
+  try {
+    const { id: gameId } = req.params;
+    const userId = req.user._id;
+
+    if (!mongoose.Types.ObjectId.isValid(gameId)) {
+      return res.status(400).json({ message: 'Invalid game ID format' });
+    }
+
+    const game = await Game.findById(gameId);
+    if (!game) {
+      return res.status(404).json({ message: 'Game not found' });
+    }
+
+    if (game.user.toString() !== userId.toString()) {
+      return res.status(403).json({ message: 'Forbidden: this game does not belong to you' });
+    }
+
+    if (game.status !== 'finished') {
+      return res.status(400).json({ message: 'Game is not finished yet' });
+    }
+
+    const correctCount = game.rounds.filter((r) => r.correct === true).length;
+    const breakdown = game.rounds.map((round) => ({
+      questionUrl: round.questionUrl,
+      yourAnswer: round.answer,
+      correctAnswer: round.solution,
+      correct: round.correct,
+      points: round.points,
+    }));
+
+    return res.status(200).json({
+      gameId: game._id,
+      id: game._id,
+      score: game.score,
+      correctCount,
+      totalRounds: game.totalRounds,
+      rounds: breakdown,
+      breakdown,
+      finishedAt: game.finishedAt,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get user game history
+ * Returns the authenticated user's finished games sorted newest first.
+ * Payload includes id, score, correct count, and finishedAt.
+ */
+export const getGameHistory = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    const games = await Game.find({ user: userId, status: 'finished' })
+      .sort({ finishedAt: -1, startedAt: -1 });
+
+    const history = games.map((game) => ({
+      id: game._id,
+      _id: game._id,
+      score: game.score,
+      correctCount: game.rounds.filter((r) => r.correct === true).length,
+      totalRounds: game.totalRounds,
+      finishedAt: game.finishedAt,
+      startedAt: game.startedAt,
+    }));
+
+    return res.status(200).json(history);
+  } catch (error) {
+    next(error);
+  }
+};

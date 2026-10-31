@@ -2,8 +2,8 @@
 
 The agent updates this file after every task: tick the box, add a one-line note, and set "Next task".
 
-**Current branch:** develop
-**Next task:** F4-T1
+**Current branch:** main
+**Next task:** None (All features completed)
 
 ## Feature 1: feature/auth-jwt
 - [x] F1-T1 User model + register/login endpoints
@@ -24,10 +24,10 @@ The agent updates this file after every task: tick the box, add a one-line note,
 - [x] F3-T4 Frontend event bus + live score HUD
 
 ## Feature 4: feature/results-leaderboard
-- [ ] F4-T1 Result and history endpoints
-- [ ] F4-T2 Results page
-- [ ] F4-T3 Leaderboard endpoint
-- [ ] F4-T4 Leaderboard page + navbar
+- [x] F4-T1 Result and history endpoints
+- [x] F4-T2 Results page
+- [x] F4-T3 Leaderboard endpoint
+- [x] F4-T4 Leaderboard page + navbar
 
 ## Notes / decisions
 - F1-T1: Created User Mongoose model and implemented POST /api/auth/register and POST /api/auth/login with 10-round bcrypt hashing and input validation.
@@ -42,3 +42,7 @@ The agent updates this file after every task: tick the box, add a one-line note,
 - F3-T2: Implemented click and keydown (0-9 to select, Enter to submit) answer handlers, double-submit protection, 1s visual feedback, and /results/:id placeholder routing.
 - F3-T3: Created Timer component with 30s countdown, visual progress bar, color warning in last 10s, and automatic answer null submission on timeout.
 - F3-T4: Implemented EventTarget-based frontend gameEvents bus (round:start, answer:submit, round:timeout, game:finish) and decoupled ScoreHud displaying live score, round, and streak with zero props.
+- F4-T1: Implemented protected GET /api/game/:id/result (owner-only, finished games only, per-round breakdown with revealed solutions) and GET /api/game/history (sorted newest first).
+- F4-T2: Built Results page at /results/:id displaying total score, correct count, per-round breakdown (puzzle image, user answer, verified solution, speed points) with green/red styling, and navigation to /game and /leaderboard.
+- F4-T3: Built MongoDB aggregation pipeline in controllers/leaderboard.controller.js and mounted GET /api/leaderboard returning top 10 players ranked by best score with games played, protecting user privacy.
+- F4-T4: Built Leaderboard page with top 10 player rankings, highlighted active user row, added Game and Leaderboard links to Navbar, and added 'My recent games' list on Game idle screen linking to /results/:id.
