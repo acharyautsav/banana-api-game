@@ -4,7 +4,7 @@
  * Root Application Component
  * Sets up BrowserRouter and routes according to architecture.md:
  * - Public routes: /login, /signup
- * - Protected routes: /game (guarded by ProtectedRoute)
+ * - Protected routes: /game, /results/:id
  * - Default redirect: / -> /game
  * Wraps entire tree in AuthProvider and includes the Navbar.
  */
@@ -15,6 +15,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { Game } from './pages/Game';
+import { Results } from './pages/Results';
 
 function App() {
   return (
@@ -34,6 +35,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Game />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/results/:id"
+                element={
+                  <ProtectedRoute>
+                    <Results />
                   </ProtectedRoute>
                 }
               />

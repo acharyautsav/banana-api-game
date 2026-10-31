@@ -1,38 +1,55 @@
 // AI-assisted: generated with Claude, reviewed and adapted by the author.
 
 /**
- * Game Page Component
- * Main interactive puzzle screen implementing game UI states:
- * - "idle": Welcomes player with start button and game rules overview
- * - "loading": Displays feedback while fetching puzzle from external Banana API
- * - "playing": Renders puzzle question image, "Round X of 5", and DigitPad component
- *
- * In F3-T1, players can click digits on the DigitPad to select and highlight their chosen answer.
+ * ============================================================================
+ * EVENT-DRIVEN PROGRAMMING THEME: Game Screen Interaction
+ * ============================================================================
+ * This page implements comprehensive GUI and keyboard event handling:
+ * 1. Click Events:
+ *    - Start Game button click triggers session setup
+ *    - DigitPad keypad button clicks select an answer
+ *    - Submit button click triggers answer evaluation
+ * 2. Keyboard Events:
+ *    - Global 'keydown' event listener attached via useEffect
+ *    - Numeric keys (0–9) immediately update selected digit
+ *    - Enter key triggers answer submission without mouse interaction
+ * 3. Double-Submit Prevention:
+ *    - Input controls are locked while API requests are in flight
+ * 4. Micro-Feedback Loop:
+ *    - Shows 1-second visual success/failure banner with awarded points
+ *    - Automatically transitions to next round or redirects to /results/:id
+ * ============================================================================
  */
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { DigitPad } from '../components/DigitPad';
 
 export const Game = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Primary UI state: 'idle' | 'loading' | 'playing'
   const [gameState, setGameState] = useState('idle');
   const [gameData, setGameData] = useState(null); // { gameId, round, totalRounds, question }
   const [selectedDigit, setSelectedDigit] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState(null); // { show, correct, points }
   const [error, setError] = useState(null);
 
+  // Mutable ref to access latest submit function within keyboard listener
+  const submitHandlerRef = useRef(null);
+
   /**
-   * Start Game Handler
-   * Requests a new game session via POST /api/game/start.
-   * Loads the initial round puzzle and transitions the interface into 'playing' state.
+   * Start a new game session via POST /api/game/start
    */
   const handleStartGame = async () => {
     try {
       setGameState('loading');
       setError(null);
       setSelectedDigit(null);
+      setFeedback(null);
 
       const response = await client.post('/game/start');
       setGameData(response.data);
@@ -49,11 +66,87 @@ export const Game = () => {
   };
 
   /**
-   * Handle digit selection from keypad click events
+   * Submit selected answer to POST /api/game/:id/answer
+   * Enforces in-flight submission lock to avoid double submits.
    */
-  const handleSelectDigit = (digit) => {
-    setSelectedDigit(digit);
+  const handleSubmitAnswer = async () => {
+    if (selectedDigit === null || isSubmitting || gameState !== 'playing' || !gameData) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const response = await client.post(`/game/${gameData.gameId}/answer`, {
+        answer: selectedDigit,
+      });
+
+      // Display 1-second feedback banner (correct/wrong + points)
+      setFeedback({
+        correct: response.data.correct,
+        points: response.data.points,
+      });
+
+      setTimeout(() => {
+        setFeedback(null);
+
+        if (response.data.finished) {
+          // Final round finished: navigate to results page
+          navigate(`/results/${response.data.gameId}`);
+        } else {
+          // Advance to next round puzzle
+          setGameData((prev) => ({
+            ...prev,
+            round: response.data.round,
+            question: response.data.question,
+          }));
+          setSelectedDigit(null);
+          setIsSubmitting(false);
+        }
+      }, 1000);
+    } catch (err) {
+      console.error('Answer submission error:', err);
+      setError(
+        err.response?.data?.message ||
+        err.message ||
+        'Failed to submit answer. Please try again.'
+      );
+      setIsSubmitting(false);
+    }
   };
+
+  // Keep ref synchronized with current submit handler
+  useEffect(() => {
+    submitHandlerRef.current = handleSubmitAnswer;
+  });
+
+  /**
+   * Keyboard Event Listener
+   * Captures physical keyboard events (0-9 for digit selection, Enter for submit)
+   */
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+
+    const handleKeyDown = (e) => {
+      // Check numeric keys 0 through 9
+      if (/^[0-9]$/.test(e.key) && !isSubmitting && !feedback) {
+        e.preventDefault();
+        setSelectedDigit(Number(e.key));
+      }
+
+      // Check Enter key to trigger submit
+      if (e.key === 'Enter' && !isSubmitting && !feedback) {
+        e.preventDefault();
+        submitHandlerRef.current?.();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [gameState, isSubmitting, feedback]);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 sm:p-6">
@@ -98,7 +191,7 @@ export const Game = () => {
               </div>
               <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800">
                 <span className="font-bold text-yellow-400 block mb-1">0-9 Digits</span>
-                <span className="text-slate-400">Answer with a single digit key.</span>
+                <span className="text-slate-400">Answer with click or keyboard.</span>
               </div>
             </div>
 
@@ -140,6 +233,21 @@ export const Game = () => {
               </div>
             </div>
 
+            {/* Answer Result Micro-Feedback */}
+            {feedback && (
+              <div
+                className={`p-3.5 rounded-xl border text-center text-sm font-bold shadow-md transition-all ${
+                  feedback.correct
+                    ? 'bg-emerald-950/90 border-emerald-500/70 text-emerald-300'
+                    : 'bg-red-950/90 border-red-500/70 text-red-300'
+                }`}
+              >
+                {feedback.correct
+                  ? `🎉 Correct! +${feedback.points} points awarded`
+                  : '❌ Incorrect! 0 points awarded'}
+              </div>
+            )}
+
             {/* Puzzle Question Image Container */}
             <div className="w-full bg-slate-950 rounded-xl p-3 border border-slate-800 flex items-center justify-center min-h-[220px]">
               <img
@@ -149,7 +257,7 @@ export const Game = () => {
               />
             </div>
 
-            {/* Selection Feedback Indicator */}
+            {/* Selection Status */}
             <div className="text-center">
               <span className="text-xs text-slate-400">Selected Answer: </span>
               {selectedDigit !== null ? (
@@ -157,17 +265,33 @@ export const Game = () => {
                   {selectedDigit}
                 </span>
               ) : (
-                <span className="text-xs text-slate-500 italic">Click a digit below</span>
+                <span className="text-xs text-slate-500 italic">Press 0–9 or click below</span>
               )}
             </div>
 
             {/* Digit Selection Keypad */}
-            <div className="pt-2">
+            <div>
               <DigitPad
                 selectedDigit={selectedDigit}
-                onSelectDigit={handleSelectDigit}
-                disabled={false}
+                onSelectDigit={(digit) => !isSubmitting && !feedback && setSelectedDigit(digit)}
+                disabled={isSubmitting || feedback !== null}
               />
+            </div>
+
+            {/* Action Footer: Submit and Keyboard Tips */}
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-800">
+              <div className="text-xs text-slate-400">
+                Keyboard: keys <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-yellow-400 font-mono font-bold">0-9</kbd> select, <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-yellow-400 font-mono font-bold">Enter</kbd> submits
+              </div>
+
+              <button
+                type="button"
+                disabled={selectedDigit === null || isSubmitting || feedback !== null}
+                onClick={handleSubmitAnswer}
+                className="w-full sm:w-auto px-7 py-2.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-black text-sm shadow-md transition transform active:scale-95 cursor-pointer"
+              >
+                {isSubmitting ? 'Evaluating...' : 'Submit Answer'}
+              </button>
             </div>
           </div>
         )}
