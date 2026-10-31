@@ -22,6 +22,9 @@
  * 5. Micro-Feedback Loop:
  *    - Shows 1-second visual success/failure banner with awarded points
  *    - Automatically transitions to next round or redirects to /results/:id
+ * 6. Decoupled Frontend Event Bus:
+ *    - Emits domain lifecycle events (round:start, answer:submit, round:timeout, game:finish)
+ *    - Allows decoupled components like ScoreHud to subscribe without prop drilling
  * ============================================================================
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -30,6 +33,8 @@ import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { DigitPad } from '../components/DigitPad';
 import { Timer } from '../components/Timer';
+import { ScoreHud } from '../components/ScoreHud';
+import { gameEvents } from '../events/gameEvents';
 
 export const Game = () => {
   const { user } = useAuth();
@@ -59,6 +64,12 @@ export const Game = () => {
       const response = await client.post('/game/start');
       setGameData(response.data);
       setGameState('playing');
+
+      // Publish round:start event on frontend event bus for decoupled consumers
+      gameEvents.emit('round:start', {
+        round: response.data.round,
+        totalRounds: response.data.totalRounds,
+      });
     } catch (err) {
       console.error('Failed to start game:', err);
       setError(
@@ -98,6 +109,22 @@ export const Game = () => {
           answer: answerToSubmit,
         });
 
+        // Publish answer:submit event with round evaluation results
+        gameEvents.emit('answer:submit', {
+          correct: response.data.correct,
+          points: response.data.points,
+          score: response.data.score,
+          round: gameData.round,
+        });
+
+        // If game has concluded on this round, publish game:finish event
+        if (response.data.finished) {
+          gameEvents.emit('game:finish', {
+            gameId: response.data.gameId,
+            score: response.data.score,
+          });
+        }
+
         // Display 1-second feedback banner (correct/wrong + points)
         setFeedback({
           correct: response.data.correct,
@@ -120,6 +147,12 @@ export const Game = () => {
             }));
             setSelectedDigit(null);
             setIsSubmitting(false);
+
+            // Publish round:start event for the next round
+            gameEvents.emit('round:start', {
+              round: response.data.round,
+              totalRounds: gameData.totalRounds,
+            });
           }
         }, 1000);
       } catch (err) {
@@ -147,6 +180,8 @@ export const Game = () => {
    */
   const handleTimeout = () => {
     if (!isSubmitting && feedback === null) {
+      // Publish round:timeout event on event bus
+      gameEvents.emit('round:timeout', { round: gameData?.round });
       submitHandlerRef.current?.(null);
     }
   };
@@ -248,23 +283,11 @@ export const Game = () => {
         {/* 3. PLAYING STATE */}
         {gameState === 'playing' && gameData && (
           <div className="space-y-6">
-            {/* Header: Round Indicator and Timer */}
-            <div className="space-y-3 pb-4 border-b border-slate-800">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs uppercase tracking-wider font-semibold text-slate-400">
-                    Current Round:
-                  </span>
-                  <span className="px-2.5 py-1 rounded-lg bg-yellow-400/20 text-yellow-300 border border-yellow-400/40 text-xs font-bold font-mono">
-                    Round {gameData.round} of {gameData.totalRounds}
-                  </span>
-                </div>
-                <div className="text-xs text-slate-400">
-                  Single-digit solution (0–9)
-                </div>
-              </div>
+            {/* Decoupled Live Score HUD (consumes gameEvents with zero props from Game) */}
+            <ScoreHud />
 
-              {/* Countdown Timer Component */}
+            {/* Header: Timer */}
+            <div className="space-y-3 pb-4 border-b border-slate-800">
               <Timer
                 round={gameData.round}
                 onTimeout={handleTimeout}
