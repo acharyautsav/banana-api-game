@@ -2,20 +2,50 @@
 
 /**
  * Root Application Component
- * Wraps the application tree in AuthProvider to distribute authentication context.
+ * Sets up BrowserRouter and routes according to architecture.md:
+ * - Public routes: /login, /signup
+ * - Protected routes: /game (guarded by ProtectedRoute)
+ * - Default redirect: / -> /game
+ * Wraps entire tree in AuthProvider and includes the Navbar.
  */
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { Navbar } from './components/Navbar';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { Login } from './pages/Login';
+import { Signup } from './pages/Signup';
+import { Game } from './pages/Game';
 
 function App() {
   return (
-    <AuthProvider>
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
-        <div className="text-center">
-          <h1 className="text-3xl font-extrabold text-yellow-400">Banana Puzzle Game</h1>
-          <p className="text-slate-400 mt-2 text-sm">Auth state ready</p>
+    <BrowserRouter>
+      <AuthProvider>
+        <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+          <Navbar />
+          <main className="flex-1">
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+
+              {/* Protected Routes */}
+              <Route
+                path="/game"
+                element={
+                  <ProtectedRoute>
+                    <Game />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Redirect root to /game */}
+              <Route path="/" element={<Navigate to="/game" replace />} />
+              <Route path="*" element={<Navigate to="/game" replace />} />
+            </Routes>
+          </main>
         </div>
-      </div>
-    </AuthProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
