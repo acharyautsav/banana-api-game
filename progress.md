@@ -3,7 +3,7 @@
 The agent updates this file after every task: tick the box, add a one-line note, and set "Next task".
 
 **Current branch:** feature/banana-api
-**Next task:** F2-T4
+**Next task:** F3-T1
 
 ## Feature 1: feature/auth-jwt
 - [x] F1-T1 User model + register/login endpoints
@@ -15,7 +15,7 @@ The agent updates this file after every task: tick the box, add a one-line note,
 - [x] F2-T1 bananaService (external API)
 - [x] F2-T2 Game model + start-game endpoint
 - [x] F2-T3 Answer validation, scoring, round progression
-- [ ] F2-T4 Backend events (EventEmitter) + error handling
+- [x] F2-T4 Backend events (EventEmitter) + error handling
 
 ## Feature 3: feature/game-ui-events
 - [ ] F3-T1 Game page + puzzle display + digit pad
@@ -37,3 +37,4 @@ The agent updates this file after every task: tick the box, add a one-line note,
 - F2-T1: Created bananaService integrating with external Banana API (HTTP GET, 5s timeout, validation) and tested via temporary protected /api/dev/puzzle route.
 - F2-T2: Created Game model, implemented protected POST /api/game/start with server-only solution storage, and removed temporary /api/dev/puzzle route.
 - F2-T3: Implemented protected POST /api/game/:id/answer with 30s server timing, speed bonus scoring (100-150 pts), 5-round progression, and finished game sealing.
+- F2-T4: Implemented backend EventEmitter for game lifecycle events (game:started, round:answered, game:finished), console event listeners, and centralized errorHandler.

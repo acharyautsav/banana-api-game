@@ -3,20 +3,22 @@
 /**
  * Game Controller
  * Manages game session lifecycle:
- * - startGame: Initializes 5-round puzzle session and fetches initial puzzle
+ * - startGame: Initializes 5-round puzzle session, fetches initial puzzle, emits "game:started"
  * - answerRound: Validates user answers, computes speed-based scoring, enforces 30s server timeout,
- *   advances rounds, and seals finished games.
+ *   advances rounds, emits "round:answered", and emits "game:finished" upon round 5 completion.
  */
 import mongoose from 'mongoose';
 import { Game } from '../models/Game.js';
 import { bananaService } from '../services/bananaService.js';
+import { gameEvents } from '../events/gameEvents.js';
 
 /**
  * Start a new game session
  * Creates a new Game record in MongoDB, fetches puzzle 1 from the external Banana API,
- * stores the secret solution strictly on the server, and returns the puzzle question to the player.
+ * stores the secret solution strictly on the server, emits "game:started", and returns
+ * the puzzle question to the player.
  */
-export const startGame = async (req, res) => {
+export const startGame = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
@@ -49,6 +51,9 @@ export const startGame = async (req, res) => {
       startedAt: new Date(),
     });
 
+    // Emit backend event: game started
+    gameEvents.emit('game:started', game._id, userId);
+
     // Return game details and question URL to client (NEVER the solution)
     return res.status(201).json({
       gameId: game._id,
@@ -57,10 +62,7 @@ export const startGame = async (req, res) => {
       question: puzzle.questionUrl,
     });
   } catch (error) {
-    console.error('Start game error:', error);
-    return res.status(500).json({
-      message: 'Internal server error starting game',
-    });
+    next(error);
   }
 };
 
@@ -68,13 +70,9 @@ export const startGame = async (req, res) => {
  * Answer current round puzzle
  * Validates player answer against server-held solution digit.
  * Enforces server-side timing: answers taking > 30 seconds count as wrong.
- * Scoring formula:
- * - Correct: 100 base points + speed bonus (0-50 linearly decreasing from 0s to 30s, rounded)
- * - Wrong or timeout: 0 points
- * If more rounds remain, fetches the next puzzle and advances round.
- * If final round, marks game finished.
+ * Emits "round:answered" and "game:finished" events.
  */
-export const answerRound = async (req, res) => {
+export const answerRound = async (req, res, next) => {
   try {
     const { id: gameId } = req.params;
     const { answer } = req.body;
@@ -134,6 +132,9 @@ export const answerRound = async (req, res) => {
     round.points = points;
     game.score += points;
 
+    // Emit backend event: round answered
+    gameEvents.emit('round:answered', game._id, currentRoundIndex + 1, isCorrect, points);
+
     const isLastRound = currentRoundIndex + 1 >= game.totalRounds;
 
     if (!isLastRound) {
@@ -173,6 +174,9 @@ export const answerRound = async (req, res) => {
       game.finishedAt = now;
       await game.save();
 
+      // Emit backend event: game finished
+      gameEvents.emit('game:finished', game._id, userId, game.score);
+
       return res.status(200).json({
         correct: isCorrect,
         points,
@@ -182,9 +186,6 @@ export const answerRound = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('Answer round error:', error);
-    return res.status(500).json({
-      message: 'Internal server error submitting answer',
-    });
+    next(error);
   }
 };
