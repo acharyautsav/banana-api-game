@@ -14,6 +14,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.routes.js';
 import gameRoutes from './routes/game.routes.js';
+import leaderboardRoutes from './routes/leaderboard.routes.js';
 import errorHandler from './middleware/errorHandler.js';
 
 const app = express();
@@ -33,6 +34,7 @@ app.use(cookieParser());
 // Mount application routes
 app.use('/api/auth', authRoutes);
 app.use('/api/game', gameRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
 
 // Health sanity check endpoint
 app.get('/', (req, res) => {
