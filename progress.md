@@ -2,8 +2,8 @@
 
 The agent updates this file after every task: tick the box, add a one-line note, and set "Next task".
 
-**Current branch:** feature/auth-jwt
-**Next task:** F2-T1
+**Current branch:** feature/banana-api
+**Next task:** F2-T2
 
 ## Feature 1: feature/auth-jwt
 - [x] F1-T1 User model + register/login endpoints
@@ -12,7 +12,7 @@ The agent updates this file after every task: tick the box, add a one-line note,
 - [x] F1-T4 Login/Signup pages + protected routes
 
 ## Feature 2: feature/banana-api
-- [ ] F2-T1 bananaService (external API)
+- [x] F2-T1 bananaService (external API)
 - [ ] F2-T2 Game model + start-game endpoint
 - [ ] F2-T3 Answer validation, scoring, round progression
 - [ ] F2-T4 Backend events (EventEmitter) + error handling
@@ -34,3 +34,4 @@ The agent updates this file after every task: tick the box, add a one-line note,
 - F1-T2: Integrated cookie-parser, JWT issuance in HTTP-only cookies on register/login, auth protect middleware, POST /api/auth/logout, and GET /api/auth/me.
 - F1-T3: Created axios client with withCredentials enabled, built AuthContext with session restoration and auth actions, and wrapped App in AuthProvider.
 - F1-T4: Built Login, Signup, Navbar, ProtectedRoute, and placeholder Game components with react-router routing.
+- F2-T1: Created bananaService integrating with external Banana API (HTTP GET, 5s timeout, validation) and tested via temporary protected /api/dev/puzzle route.

@@ -6,12 +6,13 @@
  * - CORS with credentials enabled for HTTP-only cookies
  * - JSON body parser
  * - Cookie parser for reading incoming JWT cookies
- * Mounts routes under /api/auth.
+ * Mounts routes under /api/auth and temporary dev routes under /api/dev.
  */
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.routes.js';
+import devRoutes from './routes/dev.routes.js';
 
 const app = express();
 
@@ -29,6 +30,9 @@ app.use(cookieParser());
 
 // Mount authentication routes
 app.use('/api/auth', authRoutes);
+
+// Mount temporary dev routes (TODO: remove in F2-T2)
+app.use('/api/dev', devRoutes);
 
 // Health sanity check endpoint
 app.get('/', (req, res) => {
