@@ -3,7 +3,7 @@
 The agent updates this file after every task: tick the box, add a one-line note, and set "Next task".
 
 **Current branch:** feature/results-leaderboard
-**Next task:** F4-T2
+**Next task:** F4-T3
 
 ## Feature 1: feature/auth-jwt
 - [x] F1-T1 User model + register/login endpoints
@@ -25,7 +25,7 @@ The agent updates this file after every task: tick the box, add a one-line note,
 
 ## Feature 4: feature/results-leaderboard
 - [x] F4-T1 Result and history endpoints
-- [ ] F4-T2 Results page
+- [x] F4-T2 Results page
 - [ ] F4-T3 Leaderboard endpoint
 - [ ] F4-T4 Leaderboard page + navbar
 
@@ -43,3 +43,4 @@ The agent updates this file after every task: tick the box, add a one-line note,
 - F3-T3: Created Timer component with 30s countdown, visual progress bar, color warning in last 10s, and automatic answer null submission on timeout.
 - F3-T4: Implemented EventTarget-based frontend gameEvents bus (round:start, answer:submit, round:timeout, game:finish) and decoupled ScoreHud displaying live score, round, and streak with zero props.
 - F4-T1: Implemented protected GET /api/game/:id/result (owner-only, finished games only, per-round breakdown with revealed solutions) and GET /api/game/history (sorted newest first).
+- F4-T2: Built Results page at /results/:id displaying total score, correct count, per-round breakdown (puzzle image, user answer, verified solution, speed points) with green/red styling, and navigation to /game and /leaderboard.
