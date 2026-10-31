@@ -2,14 +2,14 @@
 
 The agent updates this file after every task: tick the box, add a one-line note, and set "Next task".
 
-**Current branch:** (none yet)
-**Next task:** F1-T1
+**Current branch:** feature/auth-jwt
+**Next task:** F2-T1
 
 ## Feature 1: feature/auth-jwt
-- [ ] F1-T1 User model + register/login endpoints
-- [ ] F1-T2 JWT cookie, protect middleware, logout, me
-- [ ] F1-T3 Frontend AuthContext + axios client
-- [ ] F1-T4 Login/Signup pages + protected routes
+- [x] F1-T1 User model + register/login endpoints
+- [x] F1-T2 JWT cookie, protect middleware, logout, me
+- [x] F1-T3 Frontend AuthContext + axios client
+- [x] F1-T4 Login/Signup pages + protected routes
 
 ## Feature 2: feature/banana-api
 - [ ] F2-T1 bananaService (external API)
@@ -30,4 +30,7 @@ The agent updates this file after every task: tick the box, add a one-line note,
 - [ ] F4-T4 Leaderboard page + navbar
 
 ## Notes / decisions
-- (agent adds short notes here)
+- F1-T1: Created User Mongoose model and implemented POST /api/auth/register and POST /api/auth/login with 10-round bcrypt hashing and input validation.
+- F1-T2: Integrated cookie-parser, JWT issuance in HTTP-only cookies on register/login, auth protect middleware, POST /api/auth/logout, and GET /api/auth/me.
+- F1-T3: Created axios client with withCredentials enabled, built AuthContext with session restoration and auth actions, and wrapped App in AuthProvider.
+- F1-T4: Built Login, Signup, Navbar, ProtectedRoute, and placeholder Game components with react-router routing.
