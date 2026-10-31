@@ -4,7 +4,7 @@
  * ============================================================================
  * EVENT-DRIVEN PROGRAMMING THEME: Game Screen Interaction
  * ============================================================================
- * This page implements comprehensive GUI and keyboard event handling:
+ * This page implements comprehensive GUI, keyboard, and timer event handling:
  * 1. Click Events:
  *    - Start Game button click triggers session setup
  *    - DigitPad keypad button clicks select an answer
@@ -13,18 +13,23 @@
  *    - Global 'keydown' event listener attached via useEffect
  *    - Numeric keys (0–9) immediately update selected digit
  *    - Enter key triggers answer submission without mouse interaction
- * 3. Double-Submit Prevention:
+ * 3. Timer Events:
+ *    - Timer component runs a 30s countdown driven by setInterval
+ *    - When time expires, fires an onTimeout callback
+ *    - Auto-submits answer null to POST /api/game/:id/answer
+ * 4. Double-Submit Prevention:
  *    - Input controls are locked while API requests are in flight
- * 4. Micro-Feedback Loop:
+ * 5. Micro-Feedback Loop:
  *    - Shows 1-second visual success/failure banner with awarded points
  *    - Automatically transitions to next round or redirects to /results/:id
  * ============================================================================
  */
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { DigitPad } from '../components/DigitPad';
+import { Timer } from '../components/Timer';
 
 export const Game = () => {
   const { user } = useAuth();
@@ -35,10 +40,10 @@ export const Game = () => {
   const [gameData, setGameData] = useState(null); // { gameId, round, totalRounds, question }
   const [selectedDigit, setSelectedDigit] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState(null); // { show, correct, points }
+  const [feedback, setFeedback] = useState(null); // { show, correct, points, isTimeout }
   const [error, setError] = useState(null);
 
-  // Mutable ref to access latest submit function within keyboard listener
+  // Mutable ref to access latest submit function within keyboard and timeout listeners
   const submitHandlerRef = useRef(null);
 
   /**
@@ -66,60 +71,85 @@ export const Game = () => {
   };
 
   /**
-   * Submit selected answer to POST /api/game/:id/answer
+   * Submit answer handler
+   * Supports manual submission (selectedDigit) and automatic timeout submission (answer: null).
    * Enforces in-flight submission lock to avoid double submits.
    */
-  const handleSubmitAnswer = async () => {
-    if (selectedDigit === null || isSubmitting || gameState !== 'playing' || !gameData) {
-      return;
-    }
+  const handleSubmitAnswer = useCallback(
+    async (overrideAnswer = undefined) => {
+      const answerToSubmit = overrideAnswer !== undefined ? overrideAnswer : selectedDigit;
 
-    setIsSubmitting(true);
-    setError(null);
+      // Allow null answer for timeout, but require numeric answer for manual submits
+      if (
+        (answerToSubmit === null && overrideAnswer === undefined) ||
+        (answerToSubmit === null && overrideAnswer !== null) ||
+        isSubmitting ||
+        gameState !== 'playing' ||
+        !gameData
+      ) {
+        return;
+      }
 
-    try {
-      const response = await client.post(`/game/${gameData.gameId}/answer`, {
-        answer: selectedDigit,
-      });
+      setIsSubmitting(true);
+      setError(null);
 
-      // Display 1-second feedback banner (correct/wrong + points)
-      setFeedback({
-        correct: response.data.correct,
-        points: response.data.points,
-      });
+      try {
+        const response = await client.post(`/game/${gameData.gameId}/answer`, {
+          answer: answerToSubmit,
+        });
 
-      setTimeout(() => {
-        setFeedback(null);
+        // Display 1-second feedback banner (correct/wrong + points)
+        setFeedback({
+          correct: response.data.correct,
+          points: response.data.points,
+          isTimeout: overrideAnswer === null,
+        });
 
-        if (response.data.finished) {
-          // Final round finished: navigate to results page
-          navigate(`/results/${response.data.gameId}`);
-        } else {
-          // Advance to next round puzzle
-          setGameData((prev) => ({
-            ...prev,
-            round: response.data.round,
-            question: response.data.question,
-          }));
-          setSelectedDigit(null);
-          setIsSubmitting(false);
-        }
-      }, 1000);
-    } catch (err) {
-      console.error('Answer submission error:', err);
-      setError(
-        err.response?.data?.message ||
-        err.message ||
-        'Failed to submit answer. Please try again.'
-      );
-      setIsSubmitting(false);
-    }
-  };
+        setTimeout(() => {
+          setFeedback(null);
+
+          if (response.data.finished) {
+            // Final round finished: navigate to results page
+            navigate(`/results/${response.data.gameId}`);
+          } else {
+            // Advance to next round puzzle
+            setGameData((prev) => ({
+              ...prev,
+              round: response.data.round,
+              question: response.data.question,
+            }));
+            setSelectedDigit(null);
+            setIsSubmitting(false);
+          }
+        }, 1000);
+      } catch (err) {
+        console.error('Answer submission error:', err);
+        setError(
+          err.response?.data?.message ||
+          err.message ||
+          'Failed to submit answer. Please try again.'
+        );
+        setIsSubmitting(false);
+      }
+    },
+    [gameData, gameState, isSubmitting, navigate, selectedDigit]
+  );
 
   // Keep ref synchronized with current submit handler
   useEffect(() => {
     submitHandlerRef.current = handleSubmitAnswer;
-  });
+  }, [handleSubmitAnswer]);
+
+  /**
+   * Timeout Event Handler
+   * Triggered when the Timer countdown reaches 0 seconds.
+   * Auto-submits with answer: null.
+   */
+  const handleTimeout = () => {
+    if (!isSubmitting && feedback === null) {
+      submitHandlerRef.current?.(null);
+    }
+  };
 
   /**
    * Keyboard Event Listener
@@ -218,19 +248,29 @@ export const Game = () => {
         {/* 3. PLAYING STATE */}
         {gameState === 'playing' && gameData && (
           <div className="space-y-6">
-            {/* Header: Round Indicator */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <span className="text-xs uppercase tracking-wider font-semibold text-slate-400">
-                  Current Round:
-                </span>
-                <span className="px-2.5 py-1 rounded-lg bg-yellow-400/20 text-yellow-300 border border-yellow-400/40 text-xs font-bold font-mono">
-                  Round {gameData.round} of {gameData.totalRounds}
-                </span>
+            {/* Header: Round Indicator and Timer */}
+            <div className="space-y-3 pb-4 border-b border-slate-800">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs uppercase tracking-wider font-semibold text-slate-400">
+                    Current Round:
+                  </span>
+                  <span className="px-2.5 py-1 rounded-lg bg-yellow-400/20 text-yellow-300 border border-yellow-400/40 text-xs font-bold font-mono">
+                    Round {gameData.round} of {gameData.totalRounds}
+                  </span>
+                </div>
+                <div className="text-xs text-slate-400">
+                  Single-digit solution (0–9)
+                </div>
               </div>
-              <div className="text-xs text-slate-400">
-                Single-digit solution (0–9)
-              </div>
+
+              {/* Countdown Timer Component */}
+              <Timer
+                round={gameData.round}
+                onTimeout={handleTimeout}
+                isActive={!isSubmitting && feedback === null}
+                duration={30}
+              />
             </div>
 
             {/* Answer Result Micro-Feedback */}
@@ -242,7 +282,9 @@ export const Game = () => {
                     : 'bg-red-950/90 border-red-500/70 text-red-300'
                 }`}
               >
-                {feedback.correct
+                {feedback.isTimeout
+                  ? '⏰ Time Ran Out! 0 points awarded'
+                  : feedback.correct
                   ? `🎉 Correct! +${feedback.points} points awarded`
                   : '❌ Incorrect! 0 points awarded'}
               </div>
@@ -287,7 +329,7 @@ export const Game = () => {
               <button
                 type="button"
                 disabled={selectedDigit === null || isSubmitting || feedback !== null}
-                onClick={handleSubmitAnswer}
+                onClick={() => handleSubmitAnswer()}
                 className="w-full sm:w-auto px-7 py-2.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-black text-sm shadow-md transition transform active:scale-95 cursor-pointer"
               >
                 {isSubmitting ? 'Evaluating...' : 'Submit Answer'}

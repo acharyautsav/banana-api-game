@@ -3,7 +3,7 @@
 The agent updates this file after every task: tick the box, add a one-line note, and set "Next task".
 
 **Current branch:** feature/game-ui-events
-**Next task:** F3-T3
+**Next task:** F3-T4
 
 ## Feature 1: feature/auth-jwt
 - [x] F1-T1 User model + register/login endpoints
@@ -20,7 +20,7 @@ The agent updates this file after every task: tick the box, add a one-line note,
 ## Feature 3: feature/game-ui-events
 - [x] F3-T1 Game page + puzzle display + digit pad
 - [x] F3-T2 Submit via click and keyboard events
-- [ ] F3-T3 Countdown timer + timeout event
+- [x] F3-T3 Countdown timer + timeout event
 - [ ] F3-T4 Frontend event bus + live score HUD
 
 ## Feature 4: feature/results-leaderboard
@@ -40,3 +40,4 @@ The agent updates this file after every task: tick the box, add a one-line note,
 - F2-T4: Implemented backend EventEmitter for game lifecycle events (game:started, round:answered, game:finished), console event listeners, and centralized errorHandler.
 - F3-T1: Built DigitPad component and Game page supporting idle, loading, and playing states with real-time puzzle display and digit selection.
 - F3-T2: Implemented click and keydown (0-9 to select, Enter to submit) answer handlers, double-submit protection, 1s visual feedback, and /results/:id placeholder routing.
+- F3-T3: Created Timer component with 30s countdown, visual progress bar, color warning in last 10s, and automatic answer null submission on timeout.
