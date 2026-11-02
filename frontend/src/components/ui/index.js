@@ -4,17 +4,19 @@
  * ============================================================================
  * SHARED GAME UI COMPONENTS: Re-export Barrel
  * ============================================================================
- * Central export point for core reusable game design system components:
- * - Button: Tactical play, brand, secondary, ghost, and danger action buttons.
- * - Card: Dark blue-grey panel containers with subtle glows and borders.
- * - Input: Form input with uppercase label, icon slot, and password visibility toggle.
- * - Badge: Pill tags for rankings, categories, and status indicators.
- * - Spinner: Loading indicator for asynchronous actions.
- * - Skeleton: Animated placeholder blocks for zero-layout-shift data loading.
- * - Avatar: Gamer profile initial badge with deterministic username coloring.
+ * Central export point for core reusable Banana Arcade design system components:
+ * - Logo: Official game logo and Bungee arcade wordmark.
+ * - Button: Primary, secondary, ghost, and danger arcade action buttons.
+ * - Card: Surface panels with optional glow, hoverLift, and accentTop.
+ * - Input: Form input with uppercase label, leftIcon, and error feedback.
+ * - Badge: Pill tags for rankings, status, and categories.
+ * - Spinner: Banana-colored loading indicator.
+ * - Skeleton: Subtle technical shimmer placeholder for loading states.
+ * - Avatar: Player initial badge in banana-to-banana-deep gradient circle.
  * ============================================================================
  */
 
+export { Logo } from '../Logo.jsx';
 export { Button } from './Button.jsx';
 export { Card } from './Card.jsx';
 export { Input } from './Input.jsx';

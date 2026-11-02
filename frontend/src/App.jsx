@@ -16,11 +16,11 @@
  * - Game HUD Toaster provider with custom dark aesthetics and responsive positioning.
  * ============================================================================
  */
-import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
+import { Footer } from './components/Footer';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
@@ -29,25 +29,13 @@ import { Results } from './pages/Results';
 import { Leaderboard } from './pages/Leaderboard';
 
 function App() {
-  const [isMobile, setIsMobile] = useState(
-    typeof window !== 'undefined' ? window.innerWidth < 640 : false
-  );
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 640);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
   return (
     <BrowserRouter>
       <AuthProvider>
         <div className="min-h-screen flex flex-col font-sans text-text relative z-10">
           {/* Game Toast Notifications Provider */}
           <Toaster
-            position={isMobile ? 'top-center' : 'top-right'}
+            position="top-right"
             toastOptions={{
               className: 'toast-game',
               style: {
@@ -130,11 +118,7 @@ function App() {
           </main>
 
           {/* Global Game Footer */}
-          <footer className="w-full py-4 border-t border-line/60 bg-surface/70 backdrop-blur-sm text-center text-xs text-muted">
-            <div className="max-w-6xl mx-auto px-4">
-              Banana Puzzle · CIS046-3 · Powered by the Banana API
-            </div>
-          </footer>
+          <Footer />
         </div>
       </AuthProvider>
     </BrowserRouter>

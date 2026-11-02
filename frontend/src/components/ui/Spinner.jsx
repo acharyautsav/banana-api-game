@@ -2,9 +2,9 @@
 
 /**
  * ============================================================================
- * GAME UI DESIGN SYSTEM: Spinner Component
+ * BANANA ARCADE UI: Spinner Component
  * ============================================================================
- * Animated loading ring for asynchronous game actions, API calls, and asset loading.
+ * Banana-colored loading indicator for async actions and API fetches.
  * ============================================================================
  */
 import React from 'react';
@@ -18,21 +18,24 @@ const SPINNER_SIZES = {
 };
 
 const SPINNER_COLORS = {
-  brand: 'text-[#fdc800]',
-  info: 'text-[#66c0f4]',
+  banana: 'text-banana',
+  brand: 'text-banana',
+  jungle: 'text-jungle',
+  coral: 'text-coral',
+  cyan: 'text-cyan',
   white: 'text-white',
   current: 'text-current',
 };
 
 export const Spinner = ({
   size = 'md',
-  color = 'brand',
+  color = 'banana',
   className = '',
   label = 'Loading...',
   ...props
 }) => {
   const sizeClass = SPINNER_SIZES[size] || SPINNER_SIZES.md;
-  const colorClass = SPINNER_COLORS[color] || SPINNER_COLORS.brand;
+  const colorClass = SPINNER_COLORS[color] || SPINNER_COLORS.banana;
 
   return (
     <div

@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }) => {
       });
       setUser(response.data.user);
       setAuthSessionActive(true);
-      notify.success(`Account created! Welcome, ${response.data.user.username} 🍌`, 'auth-register');
+      notify.success(`Account created! Welcome, ${response.data.user.username}!`, 'auth-register');
       return response.data.user;
     } catch (err) {
       if (err.response) {

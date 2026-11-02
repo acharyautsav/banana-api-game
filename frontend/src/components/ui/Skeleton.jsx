@@ -2,10 +2,10 @@
 
 /**
  * ============================================================================
- * GAME UI DESIGN SYSTEM: Skeleton Component
+ * BANANA ARCADE UI: Skeleton Component
  * ============================================================================
- * Pulsing placeholder block used for layout shifts during async data loading
- * (e.g. puzzle image loading, leaderboard ranks, profile stats).
+ * Raised background placeholder with subtle technical shimmer effect for
+ * loading states without layout shifts.
  * ============================================================================
  */
 import React from 'react';
@@ -32,13 +32,16 @@ export const Skeleton = ({
 
   return (
     <div
-      className={`animate-pulse bg-[#1b2838] border border-[#2a3f55]/40 shadow-inner ${
+      className={`relative overflow-hidden bg-raised border border-line/40 ${
         variantStyles[variant] || variantStyles.rectangular
       } ${className}`}
       style={inlineStyles}
       aria-hidden="true"
       {...props}
-    />
+    >
+      {/* Subtle shimmer gradient sweep */}
+      <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none" />
+    </div>
   );
 };
 

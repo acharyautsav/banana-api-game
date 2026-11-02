@@ -2,22 +2,23 @@
 
 /**
  * ============================================================================
- * GAME NOTIFICATION SYSTEM: Toast Helper
+ * BANANA ARCADE NOTIFICATION SYSTEM: Toast Helper
  * ============================================================================
- * Exposes a clean, typed wrapper around react-hot-toast tailored for the
- * game HUD aesthetic:
- * - notify.success(msg, id?): 3000ms duration, tactical green left accent.
- * - notify.error(msg, id?): 4500ms duration, alert red left accent.
- * - notify.info(msg, id?): 3000ms duration, cyan tactical info accent.
+ * Custom wrapper around react-hot-toast styled for the Banana Arcade HUD:
+ * - notify.success(msg, id?): 3000ms duration, jungle green left accent & CheckCircle2.
+ * - notify.error(msg, id?): 4500ms duration, coral red left accent & XCircle.
+ * - notify.info(msg, id?): 3000ms duration, cyan tactical info accent & Info.
+ * - notify.warning(msg, id?): 3500ms duration, banana yellow accent & AlertTriangle.
  * - notify.dismiss(id?): Programmatically dismiss active toast(s).
  *
  * Deduplication:
- * Providing an optional `id` ensures rapid repeated events (e.g. repeated clicks,
- * network retries, or double submits) update the existing toast in-place
- * rather than stacking duplicate notifications on the player's screen.
+ * Uses optional `id` parameter so rapid duplicate events never stack.
+ * Clean: NO emoji icons; pure Lucide icons across all toast variants.
  * ============================================================================
  */
+import React from 'react';
 import toast from 'react-hot-toast';
+import { CheckCircle2, XCircle, Info, AlertTriangle } from 'lucide-react';
 
 const DEFAULT_OPTIONS = {
   style: {
@@ -45,10 +46,10 @@ export const notify = {
       id: id || undefined,
       duration: 3000,
       className: 'toast-game toast-success',
-      iconTheme: {
-        primary: '#34D399',
-        secondary: '#121826',
-      },
+      icon: React.createElement(CheckCircle2, {
+        className: 'w-5 h-5 text-jungle shrink-0',
+        'aria-hidden': 'true',
+      }),
     });
   },
 
@@ -63,10 +64,10 @@ export const notify = {
       id: id || undefined,
       duration: 4500,
       className: 'toast-game toast-error',
-      iconTheme: {
-        primary: '#FF5C7A',
-        secondary: '#ffffff',
-      },
+      icon: React.createElement(XCircle, {
+        className: 'w-5 h-5 text-coral shrink-0',
+        'aria-hidden': 'true',
+      }),
     });
   },
 
@@ -80,8 +81,11 @@ export const notify = {
       ...DEFAULT_OPTIONS,
       id: id || undefined,
       duration: 3000,
-      icon: 'ℹ️',
       className: 'toast-game toast-info',
+      icon: React.createElement(Info, {
+        className: 'w-5 h-5 text-cyan shrink-0',
+        'aria-hidden': 'true',
+      }),
     });
   },
 
@@ -95,8 +99,11 @@ export const notify = {
       ...DEFAULT_OPTIONS,
       id: id || undefined,
       duration: 3500,
-      icon: '⚠️',
       className: 'toast-game toast-warning',
+      icon: React.createElement(AlertTriangle, {
+        className: 'w-5 h-5 text-banana shrink-0',
+        'aria-hidden': 'true',
+      }),
     });
   },
 
