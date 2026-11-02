@@ -2,13 +2,13 @@
 
 The agent updates this file after every task: tick the box, add a one-line note, set "Next task".
 
-**Current branch:** feature/ui-theme-foundation
-**Next task:** U1-T3
+**Current branch:** develop
+**Next task:** U2-T1
 
 ## U1: feature/ui-theme-foundation
 - [x] U1-T1 Design tokens, fonts, global background
 - [x] U1-T2 Shared UI components (Button, Card, Input, Badge, Spinner, Skeleton, Avatar)
-- [ ] U1-T3 Navbar and layout shell
+- [x] U1-T3 Navbar and layout shell
 
 ## U2: feature/ui-notifications
 - [ ] U2-T1 Toast provider + notify helper
@@ -40,3 +40,4 @@ The agent updates this file after every task: tick the box, add a one-line note,
 ## Notes / decisions
 - U1-T1: Configured game-inspired design tokens in tailwind.config.js and index.css (@theme), loaded Rajdhani (600,700) and Inter (400,500,600) via Google Fonts in index.html, and added fixed atmospheric background with radial brand glow, custom dark scrollbar, and tabular numbers utility.
 - U1-T2: Created reusable shared UI components in src/components/ui/ (Button with play/brand/secondary/ghost/danger variants and loading spinner, Card with panel/raised/framed styles, Input with icon slot and password visibility toggle, Badge, Spinner, Skeleton, and Avatar with deterministic username coloring) and re-exported via index.js.
+- U1-T3: Redesigned Navbar (56px sticky, bg-nav, animated cyan 2px active underline, Avatar, responsive mobile tab row) and wrapped app pages in max-w-6xl layout shell with persistent course/API attribution footer.
