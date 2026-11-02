@@ -194,3 +194,34 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Custom Game HUD Toast Styles */
+.toast-game {
+  background-color: #16202d !important;
+  color: #c7d5e0 !important;
+  border: 1px solid #2a3f55 !important;
+  border-left-width: 4px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8) !important;
+  border-radius: 0.75rem !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+}
+
+.toast-success {
+  border-left-color: #a4d007 !important;
+}
+
+.toast-error {
+  border-left-color: #d94b4b !important;
+}
+
+.toast-info {
+  border-left-color: #66c0f4 !important;
+}
+
+.toast-warning {
+  border-left-color: #ffc83b !important;
+}
+
+

@@ -13,9 +13,12 @@
  * - Top sticky Steam-inspired Navbar (56px) with dynamic tabs and player avatar.
  * - Central content container (max-w-6xl, horizontal padding, flexible vertical rhythm).
  * - Global footer displaying course attribution and Banana API credit.
+ * - Game HUD Toaster provider with custom dark aesthetics and responsive positioning.
  * ============================================================================
  */
+import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -26,10 +29,64 @@ import { Results } from './pages/Results';
 import { Leaderboard } from './pages/Leaderboard';
 
 function App() {
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < 640 : false
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <BrowserRouter>
       <AuthProvider>
         <div className="min-h-screen flex flex-col font-sans text-[#c7d5e0]">
+          {/* Game Toast Notifications Provider */}
+          <Toaster
+            position={isMobile ? 'top-center' : 'top-right'}
+            toastOptions={{
+              className: 'toast-game',
+              style: {
+                background: '#16202d',
+                color: '#c7d5e0',
+                border: '1px solid #2a3f55',
+                borderRadius: '0.75rem',
+                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.8)',
+                padding: '12px 16px',
+                fontSize: '0.875rem',
+                fontFamily: 'Inter, system-ui, sans-serif',
+                maxWidth: '420px',
+              },
+              success: {
+                duration: 3000,
+                className: 'toast-game toast-success',
+                iconTheme: {
+                  primary: '#a4d007',
+                  secondary: '#16202d',
+                },
+              },
+              error: {
+                duration: 4500,
+                className: 'toast-game toast-error',
+                iconTheme: {
+                  primary: '#d94b4b',
+                  secondary: '#ffffff',
+                },
+              },
+            }}
+            containerStyle={{
+              top: 20,
+              right: 20,
+              bottom: 20,
+              left: 20,
+              pointerEvents: 'none',
+            }}
+          />
+
           {/* Sticky Game Navbar */}
           <Navbar />
 
