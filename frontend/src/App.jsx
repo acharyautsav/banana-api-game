@@ -44,16 +44,16 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <div className="min-h-screen flex flex-col font-sans text-[#c7d5e0]">
+        <div className="min-h-screen flex flex-col font-sans text-text relative z-10">
           {/* Game Toast Notifications Provider */}
           <Toaster
             position={isMobile ? 'top-center' : 'top-right'}
             toastOptions={{
               className: 'toast-game',
               style: {
-                background: '#16202d',
-                color: '#c7d5e0',
-                border: '1px solid #2a3f55',
+                background: '#121826',
+                color: '#F3F5FA',
+                border: '1px solid #27314A',
                 borderRadius: '0.75rem',
                 boxShadow: '0 10px 30px rgba(0, 0, 0, 0.8)',
                 padding: '12px 16px',
@@ -65,15 +65,15 @@ function App() {
                 duration: 3000,
                 className: 'toast-game toast-success',
                 iconTheme: {
-                  primary: '#a4d007',
-                  secondary: '#16202d',
+                  primary: '#34D399',
+                  secondary: '#121826',
                 },
               },
               error: {
                 duration: 4500,
                 className: 'toast-game toast-error',
                 iconTheme: {
-                  primary: '#d94b4b',
+                  primary: '#FF5C7A',
                   secondary: '#ffffff',
                 },
               },
@@ -130,7 +130,7 @@ function App() {
           </main>
 
           {/* Global Game Footer */}
-          <footer className="w-full py-4 border-t border-[#2a3f55]/60 bg-[#171a21]/60 backdrop-blur-sm text-center text-xs text-[#8f98a0]">
+          <footer className="w-full py-4 border-t border-line/60 bg-surface/70 backdrop-blur-sm text-center text-xs text-muted">
             <div className="max-w-6xl mx-auto px-4">
               Banana Puzzle · CIS046-3 · Powered by the Banana API
             </div>

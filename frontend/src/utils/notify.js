@@ -21,9 +21,9 @@ import toast from 'react-hot-toast';
 
 const DEFAULT_OPTIONS = {
   style: {
-    background: '#16202d',
-    color: '#c7d5e0',
-    border: '1px solid #2a3f55',
+    background: '#121826',
+    color: '#F3F5FA',
+    border: '1px solid #27314A',
     borderRadius: '0.75rem',
     boxShadow: '0 10px 30px rgba(0, 0, 0, 0.75)',
     padding: '12px 16px',
@@ -46,8 +46,8 @@ export const notify = {
       duration: 3000,
       className: 'toast-game toast-success',
       iconTheme: {
-        primary: '#a4d007',
-        secondary: '#16202d',
+        primary: '#34D399',
+        secondary: '#121826',
       },
     });
   },
@@ -64,7 +64,7 @@ export const notify = {
       duration: 4500,
       className: 'toast-game toast-error',
       iconTheme: {
-        primary: '#d94b4b',
+        primary: '#FF5C7A',
         secondary: '#ffffff',
       },
     });
