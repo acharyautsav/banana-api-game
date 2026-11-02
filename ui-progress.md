@@ -3,7 +3,7 @@
 The agent updates this file after every task: tick the box, add a one-line note, set "Next task".
 
 **Current branch:** feature/ui-notifications
-**Next task:** U2-T2
+**Next task:** U2-T3
 
 ## U1: feature/ui-theme-foundation
 - [x] U1-T1 Design tokens, fonts, global background
@@ -12,7 +12,7 @@ The agent updates this file after every task: tick the box, add a one-line note,
 
 ## U2: feature/ui-notifications
 - [x] U2-T1 Toast provider + notify helper
-- [ ] U2-T2 Auth toasts (register, login, logout, errors, session expired)
+- [x] U2-T2 Auth toasts (register, login, logout, errors, session expired)
 - [ ] U2-T3 Game and data-loading toasts
 
 ## U3: feature/ui-auth-pages
@@ -42,3 +42,4 @@ The agent updates this file after every task: tick the box, add a one-line note,
 - U1-T2: Created reusable shared UI components in src/components/ui/ (Button with play/brand/secondary/ghost/danger variants and loading spinner, Card with panel/raised/framed styles, Input with icon slot and password visibility toggle, Badge, Spinner, Skeleton, and Avatar with deterministic username coloring) and re-exported via index.js.
 - U1-T3: Redesigned Navbar (56px sticky, bg-nav, animated cyan 2px active underline, Avatar, responsive mobile tab row) and wrapped app pages in max-w-6xl layout shell with persistent course/API attribution footer.
 - U2-T1: Installed react-hot-toast, mounted Toaster in App.jsx styled with dark game panel aesthetics (#16202d, #2a3f55 border, colored left accent), and created src/utils/notify.js helper supporting deduplication IDs.
+- U2-T2: Integrated auth toasts for register, login, logout, and credential errors in AuthContext, and added Axios response interceptors for global network connectivity errors and 401 session expiration with deduplicated notifications and redirect to /login.
