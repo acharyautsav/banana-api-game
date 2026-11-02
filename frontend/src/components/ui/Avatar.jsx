@@ -29,7 +29,7 @@ export const Avatar = ({
   return (
     <div
       title={username || 'Player Avatar'}
-      className={`inline-flex items-center justify-center rounded-full bg-gradient-to-br from-banana to-banana-deep text-ink font-ui font-black shadow-md select-none shrink-0 drop-shadow-[0_0_8px_rgba(255,200,41,0.25)] ${sizeClass} ${className}`}
+      className={`inline-flex items-center justify-center rounded-full bg-gradient-to-br from-banana to-banana-deep text-ink font-ui font-black shadow-md select-none shrink-0 drop-shadow-[0_0_8px_var(--color-banana)] ${sizeClass} ${className}`}
       {...props}
     >
       <span>{initial}</span>

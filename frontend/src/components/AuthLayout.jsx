@@ -40,7 +40,7 @@ export const AuthLayout = ({ children }) => {
 
             <h1 className="font-display text-4xl xl:text-5xl font-black text-text uppercase tracking-wide leading-tight mb-4">
               SOLVE. RACE.{' '}
-              <span className="text-banana drop-shadow-[0_0_20px_rgba(255,200,41,0.4)]">
+              <span className="text-banana drop-shadow-[0_0_20px_var(--color-banana)]">
                 CLIMB.
               </span>
             </h1>

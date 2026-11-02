@@ -22,14 +22,14 @@ import { CheckCircle2, XCircle, Info, AlertTriangle } from 'lucide-react';
 
 const DEFAULT_OPTIONS = {
   style: {
-    background: '#121826',
-    color: '#F3F5FA',
-    border: '1px solid #27314A',
+    background: 'var(--color-surface)',
+    color: 'var(--color-text)',
+    border: '1px solid var(--color-line)',
     borderRadius: '0.75rem',
     boxShadow: '0 10px 30px rgba(0, 0, 0, 0.75)',
     padding: '12px 16px',
     fontSize: '0.875rem',
-    fontFamily: 'Inter, system-ui, sans-serif',
+    fontFamily: 'var(--font-sans)',
     maxWidth: '420px',
   },
 };

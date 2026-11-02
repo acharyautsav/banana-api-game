@@ -128,7 +128,7 @@ export const Lobby = ({
 
           <div>
             <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black text-text uppercase tracking-wider leading-none">
-              BANANA <span className="text-banana drop-shadow-[0_0_24px_rgba(255,200,41,0.45)]">PUZZLE</span>
+              BANANA <span className="text-banana drop-shadow-[0_0_24px_var(--color-banana)]">PUZZLE</span>
             </h1>
 
             <p className="font-sans text-base sm:text-lg text-muted mt-3">

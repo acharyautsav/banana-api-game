@@ -7,6 +7,7 @@
  */
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Spinner } from './ui';
 
 export const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -14,10 +15,12 @@ export const ProtectedRoute = ({ children }) => {
   // Show a neutral loading screen while checking cookie credentials
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-300 flex items-center justify-center">
+      <div className="min-h-screen bg-ink text-muted flex items-center justify-center">
         <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm font-medium">Authenticating session...</span>
+          <Spinner size="md" />
+          <span className="font-ui text-sm font-semibold tracking-wide text-text uppercase">
+            Authenticating session...
+          </span>
         </div>
       </div>
     );

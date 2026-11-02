@@ -65,36 +65,13 @@
     100% { background-position: 200% 0; }
   }
 
-  /* legacy, remove in Task 8 */
-  --color-bg-deep: #0e141b;
-  --color-bg-nav: #171a21;
-  --color-bg-panel: #16202d;
-  --color-bg-panel-2: #1b2838;
-  --color-deep: #0e141b;
-  --color-nav: #171a21;
-  --color-panel: #16202d;
-  --color-panel-2: #1b2838;
-  --color-border: #2a3f55;
-  --color-border-subtle: #1e3044;
-  --color-border-accent: #3d5a7a;
-  --color-text-bright: #ffffff;
-  --color-text-muted: #8f98a0;
-  --color-bright: #ffffff;
-  --color-brand: #fdc800;
-  --color-brand-hover: #ffe04d;
-  --color-info: #66c0f4;
-  --color-info-hover: #8ed1f8;
-  --color-success: #5ba32b;
-  --color-success-light: #a4d007;
-  --color-danger: #d94b4b;
-  --color-warning: #f59e0b;
 }
 
 @layer base {
   html {
     scroll-behavior: smooth;
     color-scheme: dark;
-    background-color: #0B0F17;
+    background-color: var(--color-ink);
   }
 
   body {
@@ -189,29 +166,29 @@
 
 /* Custom Game HUD Toast Styles */
 .toast-game {
-  background-color: #121826 !important;
-  color: #F3F5FA !important;
-  border: 1px solid #27314A !important;
+  background-color: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  border: 1px solid var(--color-line) !important;
   border-left-width: 4px !important;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8) !important;
   border-radius: 0.75rem !important;
-  font-family: 'Inter', system-ui, sans-serif !important;
+  font-family: var(--font-sans) !important;
   font-weight: 500 !important;
   line-height: 1.4 !important;
 }
 
 .toast-success {
-  border-left-color: #34D399 !important;
+  border-left-color: var(--color-jungle) !important;
 }
 
 .toast-error {
-  border-left-color: #FF5C7A !important;
+  border-left-color: var(--color-coral) !important;
 }
 
 .toast-info {
-  border-left-color: #38BDF8 !important;
+  border-left-color: var(--color-cyan) !important;
 }
 
 .toast-warning {
-  border-left-color: #FFC829 !important;
+  border-left-color: var(--color-banana) !important;
 }

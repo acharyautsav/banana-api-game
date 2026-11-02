@@ -12,7 +12,7 @@
  * - Mobile (<768px): Hamburger (Menu/X) slide-down panel, closes on route change and Escape.
  * ============================================================================
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut, Menu, X } from 'lucide-react';
@@ -28,16 +28,19 @@ export const Navbar = () => {
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
-  // Close on Escape key press
+  const toggleButtonRef = useRef(null);
+
+  // Close on Escape key press and return focus to toggle button
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
+      if (e.key === 'Escape' && mobileMenuOpen) {
         setMobileMenuOpen(false);
+        toggleButtonRef.current?.focus();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [mobileMenuOpen]);
 
   const handleLogout = async () => {
     setMobileMenuOpen(false);
@@ -156,6 +159,7 @@ export const Navbar = () => {
           {/* Mobile Hamburger Button */}
           <div className="flex md:hidden items-center">
             <button
+              ref={toggleButtonRef}
               type="button"
               onClick={() => setMobileMenuOpen((prev) => !prev)}
               aria-label="Toggle navigation menu"

@@ -396,7 +396,7 @@ export const Game = () => {
               <div className="w-full bg-raised border border-banana/25 rounded-2xl p-3 sm:p-4 shadow-glow-banana">
                 <div className="w-full bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 flex items-center justify-center overflow-hidden min-h-[260px] sm:min-h-[360px]">
                   {imageLoading && (
-                    <Skeleton className="w-full h-64 sm:h-80 md:h-96 rounded-xl bg-slate-200" />
+                    <Skeleton className="w-full h-64 sm:h-80 md:h-96 rounded-xl bg-surface/20" />
                   )}
                   {imageError ? (
                     <div className="p-6 text-center text-coral space-y-2">
@@ -407,7 +407,7 @@ export const Game = () => {
                     <img
                       key={gameData.question}
                       src={gameData.question}
-                      alt={`Banana Puzzle Round ${gameData.round}`}
+                      alt={`Puzzle for round ${gameData.round}`}
                       className={`w-full max-h-[460px] object-contain block mx-auto select-none transition-opacity duration-150 ${
                         imageLoading ? 'hidden' : 'block'
                       }`}

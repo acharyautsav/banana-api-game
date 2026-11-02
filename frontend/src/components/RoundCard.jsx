@@ -54,7 +54,7 @@ export const RoundCard = ({ round, roundNumber }) => {
         <div className="w-full bg-white rounded-lg p-2 sm:p-3 flex items-center justify-center overflow-hidden min-h-[140px] sm:min-h-[170px]">
           <img
             src={round?.questionUrl}
-            alt={`Round ${roundNumber} Puzzle`}
+            alt={`Puzzle for round ${roundNumber}`}
             className="max-h-36 sm:max-h-44 w-auto object-contain block mx-auto select-none"
             loading="lazy"
           />
