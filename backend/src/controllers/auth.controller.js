@@ -9,14 +9,15 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';
+import { SERVER_INSTANCE_ID, getJwtSecret } from '../config/session.js';
 
 /**
- * Helper to generate a 1-day JWT for authenticated sessions
+ * Helper to generate an instance-bound JWT for authenticated sessions
  */
 const generateToken = (userId) => {
   return jwt.sign(
-    { id: userId },
-    process.env.JWT_SECRET || 'banana_jwt_secret_dev_key_2026',
+    { id: userId, serverInstanceId: SERVER_INSTANCE_ID },
+    getJwtSecret(),
     { expiresIn: '1d' }
   );
 };

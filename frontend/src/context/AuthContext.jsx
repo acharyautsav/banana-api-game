@@ -44,6 +44,35 @@ export const AuthProvider = ({ children }) => {
     restoreSession();
   }, []);
 
+  // Active connection monitor: when user is logged in, periodically confirm server is alive
+  useEffect(() => {
+    if (!user) return;
+
+    let isSubscribed = true;
+
+    const checkServerConnection = async () => {
+      try {
+        await client.get('/auth/me');
+      } catch {
+        // Server disconnection or restart is handled via client interceptor
+        if (isSubscribed) {
+          setUser(null);
+          setAuthSessionActive(false);
+        }
+      }
+    };
+
+    // Verify connection every 5s and whenever tab is focused
+    const intervalId = setInterval(checkServerConnection, 5000);
+    window.addEventListener('focus', checkServerConnection);
+
+    return () => {
+      isSubscribed = false;
+      clearInterval(intervalId);
+      window.removeEventListener('focus', checkServerConnection);
+    };
+  }, [user]);
+
   /**
    * Log in an existing user with email and password
    */

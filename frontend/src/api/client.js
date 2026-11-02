@@ -48,23 +48,36 @@ client.interceptors.response.use(
   (error) => {
     // 1. Network / connectivity error (no HTTP response received from server)
     if (!error.response) {
-      notify.error("Can't reach the server. Check your connection.", 'network-error');
+      if (isUserLoggedIn) {
+        isUserLoggedIn = false;
+        notify.error('Server disconnected. Please log in again.', 'server-disconnected');
+
+        if (typeof onSessionExpiredCallback === 'function') {
+          onSessionExpiredCallback();
+        }
+
+        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+      } else {
+        notify.error("Can't reach the server. Check your connection.", 'network-error');
+      }
       return Promise.reject(error);
     }
 
     const { status, config } = error.response;
     const url = config?.url || '';
 
-    // Check if the request is to login/register or the initial /auth/me verification
+    // Check if the request is to login/register credential submission
     const isAuthLoginOrRegister = url.includes('/auth/login') || url.includes('/auth/register');
-    const isAuthMe = url.includes('/auth/me');
 
-    // 2. 401 Session Expired:
-    // Only fire when a previously logged-in user encounters a 401 on an API request.
-    // Never fire on the initial /auth/me check for visitors or on login/register credential failures.
-    if (status === 401 && !isAuthLoginOrRegister && !isAuthMe && isUserLoggedIn) {
+    // 2. 401 Session Expired or Server Restarted:
+    // Only fire when an active user encounters a 401 on an API request.
+    // Never fire on unauthenticated visitors (isUserLoggedIn is false) or login/register failures.
+    if (status === 401 && !isAuthLoginOrRegister && isUserLoggedIn) {
       isUserLoggedIn = false;
-      notify.error('Your session expired. Please log in again.', 'session-expired');
+      const message = error.response?.data?.message || 'Your session expired. Please log in again.';
+      notify.error(message, 'session-expired');
 
       if (typeof onSessionExpiredCallback === 'function') {
         onSessionExpiredCallback();

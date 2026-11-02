@@ -8,6 +8,13 @@
  */
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';
+import { SERVER_INSTANCE_ID, getJwtSecret } from '../config/session.js';
+
+const cookieClearOptions = {
+  httpOnly: true,
+  sameSite: 'lax',
+  secure: process.env.NODE_ENV === 'production',
+};
 
 export const protect = async (req, res, next) => {
   try {
@@ -20,26 +27,33 @@ export const protect = async (req, res, next) => {
       });
     }
 
-    // 2. Verify JWT signature using secret key
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || 'banana_jwt_secret_dev_key_2026'
-    );
+    // 2. Verify JWT signature using instance-bound secret
+    const decoded = jwt.verify(token, getJwtSecret());
 
-    // 3. Load user from database excluding passwordHash
+    // 3. Verify that token was issued by the current running server instance
+    if (!decoded.serverInstanceId || decoded.serverInstanceId !== SERVER_INSTANCE_ID) {
+      res.clearCookie('token', cookieClearOptions);
+      return res.status(401).json({
+        message: 'Server was restarted. Please log in again.',
+      });
+    }
+
+    // 4. Load user from database excluding passwordHash
     const user = await User.findById(decoded.id).select('-passwordHash');
 
     if (!user) {
+      res.clearCookie('token', cookieClearOptions);
       return res.status(401).json({
         message: 'Not authorized, user not found',
       });
     }
 
-    // 4. Attach verified user to request object
+    // 5. Attach verified user to request object
     req.user = user;
     next();
   } catch (error) {
-    console.error('Authentication protect error:', error.message);
+    // Clear dead/invalid token cookie
+    res.clearCookie('token', cookieClearOptions);
     return res.status(401).json({
       message: 'Not authorized, invalid or expired token',
     });
