@@ -1,74 +1,196 @@
+/* AI-assisted: generated with Claude, reviewed and adapted by the author. */
+
+/**
+ * ============================================================================
+ * GAME HUD DESIGN FOUNDATION: Global Stylesheet
+ * ============================================================================
+ * Implements a bespoke PC game HUD visual foundation:
+ * - Theme tokens for deep space panels, muted slate borders, tactical indicators.
+ * - Dual typography: 'Rajdhani' for punchy HUD headings and numbers; 'Inter' for clean body text.
+ * - Atmospheric fixed background with subtle radial brand glow.
+ * - Smooth scrolling, game-themed custom scrollbars, and tabular numeric alignments.
+ * ============================================================================
+ */
+
 @import "tailwindcss";
 
+@theme {
+  --color-bg-deep: #0e141b;
+  --color-bg-nav: #171a21;
+  --color-bg-panel: #16202d;
+  --color-bg-panel-2: #1b2838;
+  --color-deep: #0e141b;
+  --color-nav: #171a21;
+  --color-panel: #16202d;
+  --color-panel-2: #1b2838;
+  --color-border: #2a3f55;
+  --color-border-subtle: #1e3044;
+  --color-border-accent: #3d5a7a;
+  --color-text: #c7d5e0;
+  --color-text-bright: #ffffff;
+  --color-text-muted: #8f98a0;
+  --color-bright: #ffffff;
+  --color-muted: #8f98a0;
+  --color-brand: #fdc800;
+  --color-brand-hover: #ffe04d;
+  --color-info: #66c0f4;
+  --color-info-hover: #8ed1f8;
+  --color-success: #5ba32b;
+  --color-success-light: #a4d007;
+  --color-danger: #d94b4b;
+  --color-warning: #f59e0b;
+
+  --font-display: 'Rajdhani', sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+:root {
+  --bg-deep: #0e141b;
+  --bg-nav: #171a21;
+  --bg-panel: #16202d;
+  --bg-panel-2: #1b2838;
+  --border-color: #2a3f55;
+  --text-color: #c7d5e0;
+  --text-bright: #ffffff;
+  --text-muted: #8f98a0;
+  --color-brand: #fdc800;
+  --color-info: #66c0f4;
+  --color-success: #5ba32b;
+  --color-danger: #d94b4b;
+  --color-warning: #f59e0b;
+}
+
 @layer base {
-  :root {
-    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  html {
+    scroll-behavior: smooth;
+    color-scheme: dark;
   }
 
   body {
     margin: 0;
     padding: 0;
     font-family: var(--font-sans);
-    background-color: #0b0f19;
-    color: #f1f5f9;
+    color: var(--text-color);
     min-height: 100vh;
     overflow-x: hidden;
+    background:
+      radial-gradient(ellipse 70% 30% at 50% 0%, rgba(253, 200, 0, 0.08), transparent 75%),
+      radial-gradient(circle at 10% 20%, rgba(102, 192, 244, 0.03), transparent 35%),
+      linear-gradient(to bottom, #1b2838 0%, #0e141b 65%);
+    background-attachment: fixed;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: 0.02em;
+    color: var(--text-bright);
+  }
+
+  ::selection {
+    background-color: rgba(253, 200, 0, 0.25);
+    color: #ffffff;
   }
 }
 
-/* Custom modern scrollbar */
+/* Custom Tactical Game Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #0e141b;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #2a3f55;
   border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.25);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #3d5a7a;
 }
 
-/* Glassmorphism utility */
-.glass {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* Tabular numbers utility for timers, scoreboards, and counters */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
-.glass-card {
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+/* Game HUD Utility Classes */
+.hud-panel {
+  background-color: #16202d;
+  border: 1px solid #2a3f55;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-.glass-dropdown {
-  background: rgba(15, 23, 42, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.hud-panel-raised {
+  background-color: #1b2838;
+  border: 1px solid #2a3f55;
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 35px -5px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-/* Glowing text and borders */
-.glow-purple {
-  box-shadow: 0 0 25px -5px rgba(168, 85, 247, 0.4);
+/* Tactical Corner Accent Borders */
+.hud-frame {
+  position: relative;
 }
 
-.glow-cyan {
-  box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.4);
+.hud-frame::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid #66c0f4;
+  border-left: 2px solid #66c0f4;
+  pointer-events: none;
 }
 
-.text-gradient {
-  background: linear-gradient(135deg, #a855f7 0%, #6366f1 50%, #06b6d4 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.hud-frame::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  border-bottom: 2px solid #66c0f4;
+  border-right: 2px solid #66c0f4;
+  pointer-events: none;
+}
+
+/* Play Variant Glowing Button Pulse */
+.btn-play-glow {
+  box-shadow: 0 0 20px rgba(91, 163, 43, 0.35);
+  transition: box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+.btn-play-glow:hover {
+  box-shadow: 0 0 28px rgba(164, 208, 7, 0.5);
+}
+
+.btn-brand-glow {
+  box-shadow: 0 0 20px rgba(253, 200, 0, 0.25);
+  transition: box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+.btn-brand-glow:hover {
+  box-shadow: 0 0 28px rgba(253, 200, 0, 0.45);
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
