@@ -1,14 +1,22 @@
 // AI-assisted: generated with Claude, reviewed and adapted by the author.
 
 /**
- * Login Page
- * Controlled form collecting email and password credentials.
- * Interacts with AuthContext to authenticate the user, stores the JWT cookie,
- * shows real-time server error feedback, and redirects to /game upon successful authentication.
+ * ============================================================================
+ * BANANA ARCADE: Login Page
+ * ============================================================================
+ * Controlled login form collecting email and password credentials.
+ * - Restyled with the split-screen AuthLayout.
+ * - Uses shared Card, Input (with Mail/Lock icons and password toggle), and Button.
+ * - Displays inline coral error banner upon invalid credentials or connection issues.
+ * - Preserves existing authentication logic, state handlers, and redirect to /game.
+ * ============================================================================
  */
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Mail, Lock, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { AuthLayout } from '../components/AuthLayout';
+import { Card, Input, Button } from '../components/ui';
 
 export const Login = () => {
   const [formData, setFormData] = useState({
@@ -51,70 +59,82 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 bg-slate-950">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-xl">
-        <div className="text-center mb-8">
-          <span className="text-4xl block mb-2" role="img" aria-label="banana">🍌</span>
-          <h2 className="text-2xl font-bold text-white">Welcome Back</h2>
-          <p className="text-sm text-slate-400 mt-1">
+    <AuthLayout>
+      <Card accentTop className="p-6 sm:p-8">
+        {/* Title and Subtitle */}
+        <div className="text-left mb-8">
+          <h2 className="font-ui text-3xl font-bold text-text uppercase tracking-wide">
+            Welcome Back
+          </h2>
+          <p className="text-sm text-muted mt-1.5 font-sans">
             Log in to continue your Banana Puzzle journey
           </p>
         </div>
 
-        {error && (
-          <div className="mb-6 p-3 rounded-xl bg-red-950/80 border border-red-800 text-sm text-red-200">
-            {error}
-          </div>
-        )}
+        {/* Credentials Form */}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Email Input */}
+          <Input
+            label="Email Address"
+            type="email"
+            name="email"
+            required
+            autoComplete="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="player@example.com"
+            leftIcon={<Mail className="w-4 h-4 text-muted" aria-hidden="true" />}
+          />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-              Email Address
-            </label>
-            <input
-              type="email"
-              name="email"
-              required
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="player@example.com"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-yellow-400"
-            />
-          </div>
+          {/* Password Input */}
+          <Input
+            label="Password"
+            type="password"
+            name="password"
+            required
+            autoComplete="current-password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="••••••••"
+            leftIcon={<Lock className="w-4 h-4 text-muted" aria-hidden="true" />}
+          />
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              required
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-yellow-400"
-            />
-          </div>
+          {/* Inline Error Banner */}
+          {error && (
+            <div
+              className="flex items-center gap-2.5 p-3.5 rounded-xl bg-coral/10 border border-coral/40 text-coral text-sm font-sans"
+              role="alert"
+            >
+              <AlertCircle className="w-5 h-5 shrink-0" aria-hidden="true" />
+              <span>{error}</span>
+            </div>
+          )}
 
-          <button
+          {/* Submit Action */}
+          <Button
             type="submit"
+            variant="primary"
+            size="lg"
+            loading={isSubmitting}
             disabled={isSubmitting}
-            className="w-full py-3 mt-2 rounded-xl bg-yellow-400 hover:bg-yellow-300 disabled:opacity-50 text-slate-950 font-bold text-sm transition cursor-pointer"
+            className="w-full mt-2"
           >
-            {isSubmitting ? 'Logging In...' : 'Log In'}
-          </button>
+            LOG IN
+          </Button>
         </form>
 
-        <p className="text-center text-xs text-slate-400 mt-6">
+        {/* Sign up redirect footer */}
+        <p className="text-center text-xs sm:text-sm text-muted mt-8 font-sans">
           Don't have an account?{' '}
-          <Link to="/signup" className="text-yellow-400 hover:underline font-semibold">
-            Sign up here
+          <Link
+            to="/signup"
+            className="text-banana hover:underline font-ui font-bold uppercase tracking-wider ml-1"
+          >
+            Sign up
           </Link>
         </p>
-      </div>
-    </div>
+      </Card>
+    </AuthLayout>
   );
 };
 
