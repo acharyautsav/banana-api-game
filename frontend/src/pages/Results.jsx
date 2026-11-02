@@ -12,19 +12,26 @@
  * 2. Visual Round Breakdown:
  *    - Each round displays the puzzle image fetched from Marc Conrad's Banana API,
  *      the player's answer, the revealed correct solution, and speed bonus points.
- *    - Dynamic green/red styling clearly distinguishes correct from incorrect rounds.
+ *    - Dynamic jungle/coral styling clearly distinguishes correct from incorrect rounds.
  * 3. Navigation Controls:
  *    - "Play Again" routes to /game to start a new session.
  *    - "View Leaderboard" routes to /leaderboard to compare global rankings.
+ *    - "Back to Game Screen" returns to the arcade lobby.
  * ============================================================================
  */
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { motion, useReducedMotion } from 'framer-motion';
+import { ArrowLeft, AlertCircle } from 'lucide-react';
 import client from '../api/client';
+import { Button, Card, Skeleton } from '../components/ui';
+import { ResultHero } from '../components/ResultHero';
+import { RoundCard } from '../components/RoundCard';
 
 export const Results = () => {
   const { id: gameId } = useParams();
   const navigate = useNavigate();
+  const shouldReduceMotion = useReducedMotion();
 
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -66,14 +73,61 @@ export const Results = () => {
     };
   }, [gameId]);
 
-  // 1. Loading State
+  // 1. Loading State (Skeleton Hero and 4 Skeleton Round Cards)
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6">
-        <div className="w-12 h-12 border-3 border-yellow-400 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-sm font-medium text-slate-300">
-          Loading game results and answer breakdown...
-        </p>
+      <div className="w-full flex-1 flex flex-col justify-center">
+        <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
+          {/* Skeleton Hero Card */}
+          <Card
+            accentTop
+            bodyClassName="p-6 sm:p-8 flex flex-col items-center space-y-6"
+          >
+            <div className="flex items-center gap-3">
+              <Skeleton className="w-32 h-8 rounded-lg" />
+              <Skeleton className="w-10 h-10 rounded-xl" />
+            </div>
+            <Skeleton className="w-64 h-9 rounded-lg" />
+            <Skeleton className="w-48 h-4 rounded-md" />
+            <div className="flex flex-col items-center gap-2">
+              <Skeleton className="w-24 h-24 rounded-2xl" />
+              <Skeleton className="w-14 h-3 rounded" />
+            </div>
+            <Skeleton className="w-36 h-12 rounded-xl" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-lg">
+              <Skeleton className="h-20 rounded-xl" />
+              <Skeleton className="h-20 rounded-xl" />
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 w-full max-w-lg">
+              <Skeleton className="h-12 flex-1 rounded-xl" />
+              <Skeleton className="h-12 flex-1 rounded-xl" />
+            </div>
+          </Card>
+
+          {/* Skeleton Round Breakdown */}
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <Skeleton className="w-48 h-6 rounded-md" />
+              <Skeleton className="w-24 h-4 rounded-md" />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i} bodyClassName="p-5 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <Skeleton className="w-20 h-4 rounded" />
+                    <Skeleton className="w-24 h-6 rounded-full" />
+                  </div>
+                  <Skeleton className="w-full h-44 rounded-xl" />
+                  <div className="grid grid-cols-3 gap-3">
+                    <Skeleton className="h-16 rounded-xl" />
+                    <Skeleton className="h-16 rounded-xl" />
+                    <Skeleton className="h-16 rounded-xl" />
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -81,234 +135,110 @@ export const Results = () => {
   // 2. Error State
   if (error || !result) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-slate-950 text-slate-100 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 text-center shadow-2xl space-y-4">
-          <span className="text-5xl block" role="img" aria-label="error">⚠️</span>
-          <h1 className="text-2xl font-black text-white">Result Not Available</h1>
-          <p className="text-sm text-red-400 bg-red-950/60 border border-red-900/80 rounded-xl p-3">
-            {error || 'Unable to load game breakdown.'}
-          </p>
-          <div className="pt-2">
-            <button
-              type="button"
-              onClick={() => navigate('/game')}
-              className="px-6 py-2.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-bold text-sm transition cursor-pointer"
-            >
-              Return to Game
-            </button>
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
+        <Card
+          className="max-w-md w-full border-coral/40 shadow-glow-coral text-center"
+          bodyClassName="p-6 sm:p-8 flex flex-col items-center space-y-4"
+        >
+          <div className="w-16 h-16 rounded-2xl bg-coral/10 border border-coral/30 flex items-center justify-center text-coral mb-1">
+            <AlertCircle className="w-8 h-8" aria-hidden="true" />
           </div>
-        </div>
+          <h1 className="font-ui text-2xl font-bold uppercase tracking-wide text-text">
+            Result Not Available
+          </h1>
+          <p className="text-sm text-coral bg-coral/10 border border-coral/30 rounded-xl p-3 w-full font-sans">
+            {error || 'Unable to retrieve game breakdown.'}
+          </p>
+          <div className="pt-2 w-full">
+            <Button
+              variant="primary"
+              size="md"
+              className="w-full"
+              leftIcon={<ArrowLeft className="w-4 h-4" />}
+              onClick={() => navigate('/game')}
+            >
+              Back to Game Screen
+            </Button>
+          </div>
+        </Card>
       </div>
     );
   }
 
   const { score, correctCount, totalRounds, rounds } = result;
-  const accuracyPercentage = Math.round((correctCount / totalRounds) * 100);
+
+  // Stagger animation configuration for round cards
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: shouldReduceMotion ? 0 : 0.07,
+      },
+    },
+  };
+
+  const cardVariants = {
+    hidden: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 16 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.25, ease: 'easeOut' },
+    },
+  };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-slate-950 text-slate-100 py-8 px-4 sm:px-6">
-      <div className="max-w-3xl mx-auto space-y-6">
-        {/* Header Summary Card */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl text-center space-y-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-yellow-400/10 border border-yellow-400/20 text-4xl mb-1">
-            🍌
-          </div>
+    <div className="w-full flex-1 flex flex-col justify-center">
+      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
+        {/* 1. Hero Summary Card */}
+        <ResultHero
+          score={score}
+          correctCount={correctCount}
+          totalRounds={totalRounds}
+          onPlayAgain={() => navigate('/game')}
+          onViewLeaderboard={() => navigate('/leaderboard')}
+        />
 
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-              Game Completed!
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Review your answers and verified Banana API solutions below
-            </p>
-          </div>
-
-          {/* Key Metrics Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-xl mx-auto">
-            {/* Final Score */}
-            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex flex-col items-center">
-              <span className="text-xs uppercase font-semibold text-slate-400">
-                Final Score
-              </span>
-              <div className="flex items-center gap-1.5 mt-1">
-                <span className="text-2xl sm:text-3xl font-black font-mono text-yellow-400">
-                  {score}
-                </span>
-                <span className="text-xs text-slate-400 font-mono">pts</span>
-              </div>
-            </div>
-
-            {/* Correct Answers */}
-            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex flex-col items-center">
-              <span className="text-xs uppercase font-semibold text-slate-400">
-                Accuracy
-              </span>
-              <div className="flex items-center gap-1.5 mt-1">
-                <span className="text-2xl sm:text-3xl font-black font-mono text-white">
-                  {correctCount}
-                </span>
-                <span className="text-xs text-slate-400 font-mono">/ {totalRounds}</span>
-              </div>
-            </div>
-
-            {/* Performance Rate */}
-            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex flex-col items-center">
-              <span className="text-xs uppercase font-semibold text-slate-400">
-                Success Rate
-              </span>
-              <div className="flex items-center gap-1.5 mt-1">
-                <span
-                  className={`text-2xl sm:text-3xl font-black font-mono ${
-                    accuracyPercentage >= 80
-                      ? 'text-emerald-400'
-                      : accuracyPercentage >= 60
-                      ? 'text-yellow-400'
-                      : 'text-amber-400'
-                  }`}
-                >
-                  {accuracyPercentage}%
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Action Navigation Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <Link
-              to="/game"
-              className="w-full sm:w-auto px-7 py-3 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black text-sm shadow-lg shadow-yellow-400/20 transition transform active:scale-95 text-center cursor-pointer"
-            >
-              Play Again
-            </Link>
-            <Link
-              to="/leaderboard"
-              className="w-full sm:w-auto px-7 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm border border-slate-700 transition transform active:scale-95 text-center cursor-pointer"
-            >
-              View Leaderboard
-            </Link>
-          </div>
-        </div>
-
-        {/* Per-Round Breakdown List */}
+        {/* 2. Round Breakdown Section */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-lg font-bold text-white tracking-tight">
-              Round Breakdown
-            </h2>
-            <span className="text-xs text-slate-400">
+          {/* Section Heading Row */}
+          <div className="flex items-end justify-between px-1">
+            <div>
+              <h2 className="font-ui text-xl font-bold uppercase tracking-wide text-text">
+                ROUND BREAKDOWN
+              </h2>
+              <div className="h-1 w-12 bg-banana rounded-full mt-1.5" />
+            </div>
+            <span className="font-ui text-xs sm:text-sm text-muted">
               {rounds?.length || 0} rounds total
             </span>
           </div>
 
-          <div className="space-y-4">
-            {rounds?.map((round, index) => {
-              const roundNumber = index + 1;
-              const isCorrect = round.correct;
-              const isTimeout = round.yourAnswer === null || round.yourAnswer === undefined;
-
-              return (
-                <div
-                  key={index}
-                  className={`p-4 sm:p-5 rounded-2xl border transition-all ${
-                    isCorrect
-                      ? 'bg-emerald-950/20 border-emerald-500/40'
-                      : 'bg-red-950/20 border-red-500/40'
-                  }`}
-                >
-                  <div className="flex flex-col md:flex-row items-center gap-5">
-                    {/* Left: Round Badge & Puzzle Image */}
-                    <div className="w-full md:w-56 shrink-0 flex flex-col items-center">
-                      <div className="w-full flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold uppercase tracking-wider font-mono text-slate-400">
-                          Round {roundNumber}
-                        </span>
-                        <span
-                          className={`text-xs font-black px-2 py-0.5 rounded ${
-                            isCorrect
-                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                              : 'bg-red-500/20 text-red-300 border border-red-500/30'
-                          }`}
-                        >
-                          {isCorrect ? '✓ Correct' : isTimeout ? '⏰ Timed Out' : '✗ Incorrect'}
-                        </span>
-                      </div>
-
-                      <div className="w-full bg-slate-950 rounded-xl p-2 border border-slate-800 flex items-center justify-center">
-                        <img
-                          src={round.questionUrl}
-                          alt={`Round ${roundNumber} Puzzle`}
-                          className="max-h-32 w-auto object-contain rounded-lg"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Right: Round Answer Evaluation Metrics */}
-                    <div className="flex-1 w-full grid grid-cols-3 gap-3 text-center sm:text-left">
-                      {/* Your Answer */}
-                      <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col items-center justify-center">
-                        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                          Your Answer
-                        </span>
-                        <div className="mt-1">
-                          {round.yourAnswer !== null && round.yourAnswer !== undefined ? (
-                            <span
-                              className={`text-2xl font-black font-mono ${
-                                isCorrect ? 'text-emerald-400' : 'text-red-400'
-                              }`}
-                            >
-                              {round.yourAnswer}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-red-400 font-semibold italic">
-                              None
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Correct Answer */}
-                      <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col items-center justify-center">
-                        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                          Solution
-                        </span>
-                        <div className="mt-1">
-                          <span className="text-2xl font-black font-mono text-emerald-400">
-                            {round.correctAnswer}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Points Awarded */}
-                      <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col items-center justify-center">
-                        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                          Points
-                        </span>
-                        <div className="mt-1">
-                          <span
-                            className={`text-2xl font-black font-mono ${
-                              round.points > 0 ? 'text-yellow-400' : 'text-slate-500'
-                            }`}
-                          >
-                            +{round.points}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          {/* Staggered Cards Grid: 2 columns on lg and up, 1 column below */}
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6"
+          >
+            {rounds?.map((round, index) => (
+              <motion.div key={index} variants={cardVariants}>
+                <RoundCard round={round} roundNumber={index + 1} />
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
 
-        {/* Bottom Actions Footer */}
-        <div className="pt-2 pb-6 flex items-center justify-center gap-4">
-          <Link
-            to="/game"
-            className="text-xs font-semibold text-slate-400 hover:text-yellow-400 transition"
+        {/* 3. Footer Action Navigation */}
+        <div className="pt-2 pb-6 flex items-center justify-center">
+          <Button
+            variant="ghost"
+            size="md"
+            leftIcon={<ArrowLeft className="w-4 h-4" />}
+            onClick={() => navigate('/game')}
           >
-            ← Back to Game Screen
-          </Link>
+            Back to Game Screen
+          </Button>
         </div>
       </div>
     </div>
