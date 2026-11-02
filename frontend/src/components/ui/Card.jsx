@@ -37,6 +37,7 @@ export const Card = ({
   title = null,
   description = null,
   footer = null,
+  bodyClassName = '',
   ...props
 }) => {
   const glowClass = glow ? GLOW_STYLES[glow] || '' : '';
@@ -73,7 +74,7 @@ export const Card = ({
       )}
 
       {/* Main card body */}
-      <div className="p-5">{children}</div>
+      <div className={bodyClassName || 'p-5'}>{children}</div>
 
       {/* Optional card footer */}
       {footer && (

@@ -13,14 +13,17 @@
  *    - When the countdown reaches 0 seconds, it fires the `onTimeout` callback,
  *      instructing the parent component to auto-submit with a null answer.
  * 3. Visual Progression:
- *    - Progress bar and digital countdown number.
- *    - Visual state shift: changes to warning/urgent red in the final 10 seconds.
+ *    - Prominent font-display digits showing remaining seconds with Timer icon.
+ *    - Thick progress bar below tracking duration percentage.
+ *    - Color shifts: >15s = cyan, <=15s = banana, <=7s = coral with pulse and glow.
  *
  * NOTE: The server is the authoritative source of truth for elapsed round time.
  * The client timer serves as an ergonomic GUI synchronization aid for the player.
  * ============================================================================
  */
 import { useState, useEffect, useRef } from 'react';
+import { Timer as TimerIcon } from 'lucide-react';
+import { Card } from './ui/Card';
 
 export const Timer = ({
   round,
@@ -68,37 +71,51 @@ export const Timer = ({
   }, [isActive, round]);
 
   const percentage = Math.max(0, Math.min(100, (timeLeft / duration) * 100));
-  const isUrgent = timeLeft <= 10;
+
+  // Visual colour states based on urgency
+  let digitColor = 'text-cyan';
+  let iconColor = 'text-cyan';
+  let barColor = 'bg-cyan';
+
+  if (timeLeft <= 7) {
+    digitColor = 'text-coral animate-pulse-fast';
+    iconColor = 'text-coral animate-pulse-fast';
+    barColor = 'bg-coral shadow-glow-coral';
+  } else if (timeLeft <= 15) {
+    digitColor = 'text-banana';
+    iconColor = 'text-banana';
+    barColor = 'bg-banana';
+  }
 
   return (
-    <div className="w-full space-y-1.5" role="timer" aria-live="polite">
-      <div className="flex items-center justify-between text-xs">
-        <span className="font-semibold uppercase tracking-wider text-slate-400">
-          Time Remaining
-        </span>
+    <Card bodyClassName="p-4 sm:p-5 flex flex-col items-center justify-center gap-3 w-full">
+      <div className="flex items-center justify-center gap-3">
+        <TimerIcon
+          className={`w-8 h-8 sm:w-10 sm:h-10 shrink-0 transition-colors ${iconColor}`}
+          aria-hidden="true"
+        />
         <span
-          className={`font-mono font-black text-sm px-2 py-0.5 rounded ${
-            isUrgent
-              ? 'text-red-400 bg-red-950/80 border border-red-800 animate-pulse'
-              : 'text-emerald-400 bg-emerald-950/60 border border-emerald-800/80'
-          }`}
+          role="timer"
+          aria-live="off"
+          className={`font-display text-5xl sm:text-6xl tracking-wider leading-none transition-colors ${digitColor}`}
         >
           {timeLeft}s
         </span>
       </div>
 
-      {/* Visual Countdown Progress Bar */}
-      <div className="w-full h-2 rounded-full bg-slate-950 border border-slate-800 overflow-hidden">
+      {/* Accessible screen reader announcement only at 10s and 5s */}
+      <div className="sr-only" aria-live="polite">
+        {timeLeft === 10 ? '10 seconds remaining' : timeLeft === 5 ? '5 seconds remaining' : ''}
+      </div>
+
+      {/* Thick Progress Bar */}
+      <div className="w-full h-3 rounded-full bg-raised border border-line overflow-hidden p-0.5">
         <div
           style={{ width: `${percentage}%` }}
-          className={`h-full transition-all duration-1000 ease-linear rounded-full ${
-            isUrgent
-              ? 'bg-gradient-to-r from-red-600 to-rose-500'
-              : 'bg-gradient-to-r from-emerald-500 to-teal-400'
-          }`}
+          className={`h-full rounded-full transition-all duration-1000 ease-linear ${barColor}`}
         />
       </div>
-    </div>
+    </Card>
   );
 };
 

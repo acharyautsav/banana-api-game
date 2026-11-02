@@ -20,7 +20,7 @@
  * 4. Double-Submit Prevention:
  *    - Input controls are locked while API requests are in flight
  * 5. Micro-Feedback Loop:
- *    - Shows 1-second visual success/failure banner with awarded points
+ *    - Shows 1-second visual success/failure result Card with awarded points
  *    - Automatically transitions to next round or redirects to /results/:id
  * 6. Decoupled Frontend Event Bus:
  *    - Emits domain lifecycle events (round:start, answer:submit, round:timeout, game:finish)
@@ -29,13 +29,94 @@
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { Send, AlertCircle, CheckCircle2, XCircle, Timer as TimerIcon } from 'lucide-react';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { Button, Card, Skeleton, Spinner } from '../components/ui';
 import { DigitPad } from '../components/DigitPad';
 import { Timer } from '../components/Timer';
 import { ScoreHud } from '../components/ScoreHud';
 import { Lobby } from '../components/Lobby';
 import { gameEvents } from '../events/gameEvents';
+
+/**
+ * Micro-Feedback Result Card
+ * Displays animated evaluation banner replacing the plain notification
+ */
+const FeedbackCard = ({ feedback }) => {
+  const shouldReduceMotion = useReducedMotion();
+  const isCorrect = feedback.correct;
+  const isTimeout = feedback.isTimeout;
+
+  let borderColor = 'border-jungle shadow-glow-jungle';
+  let title = 'CORRECT';
+  let titleColor = 'text-jungle';
+  let pointsDisplay = `+${feedback.points || 0}`;
+  let pointsColor = 'text-banana animate-pop';
+  let Icon = CheckCircle2;
+  let iconColor = 'text-jungle';
+  let cardAnimation = '';
+
+  if (isTimeout) {
+    borderColor = 'border-coral shadow-glow-coral';
+    title = "TIME'S UP";
+    titleColor = 'text-coral';
+    pointsDisplay = '+0';
+    pointsColor = 'text-muted';
+    Icon = TimerIcon;
+    iconColor = 'text-coral';
+    cardAnimation = 'animate-shake';
+  } else if (!isCorrect) {
+    borderColor = 'border-coral shadow-glow-coral';
+    title = 'INCORRECT';
+    titleColor = 'text-coral';
+    pointsDisplay = '+0';
+    pointsColor = 'text-muted';
+    Icon = XCircle;
+    iconColor = 'text-coral';
+    cardAnimation = 'animate-shake';
+  }
+
+  return (
+    <motion.div
+      initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0.95, opacity: 0 }}
+      animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1, opacity: 1 }}
+      exit={shouldReduceMotion ? { opacity: 0 } : { scale: 0.95, opacity: 0 }}
+      transition={{ duration: 0.18, ease: 'easeOut' }}
+      role="status"
+      aria-live="polite"
+      className="w-full"
+    >
+      <Card
+        className={`w-full ${borderColor} ${cardAnimation}`}
+        bodyClassName="p-4 sm:p-5"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Icon className={`w-8 h-8 sm:w-9 sm:h-9 shrink-0 ${iconColor}`} aria-hidden="true" />
+            <div>
+              <h3 className={`font-ui font-bold text-xl sm:text-2xl uppercase tracking-wider ${titleColor} leading-none`}>
+                {title}
+              </h3>
+              <p className="font-ui text-xs text-muted mt-1 uppercase tracking-wider">
+                {isCorrect ? 'Round Points' : isTimeout ? 'Time Expired' : 'No Points Awarded'}
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            <span className={`font-display text-3xl sm:text-4xl ${pointsColor} leading-none inline-block`}>
+              {pointsDisplay}
+            </span>
+            <span className="block font-ui text-[10px] text-muted uppercase font-bold tracking-wider mt-0.5">
+              PTS
+            </span>
+          </div>
+        </div>
+      </Card>
+    </motion.div>
+  );
+};
 
 export const Game = () => {
   const { user } = useAuth();
@@ -46,13 +127,16 @@ export const Game = () => {
   const [gameData, setGameData] = useState(null); // { gameId, round, totalRounds, question }
   const [selectedDigit, setSelectedDigit] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState(null); // { show, correct, points, isTimeout }
+  const [feedback, setFeedback] = useState(null); // { correct, points, isTimeout }
   const [error, setError] = useState(null);
   const [recentGames, setRecentGames] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
   // Mutable ref to access latest submit function within keyboard and timeout listeners
   const submitHandlerRef = useRef(null);
+
 
   /**
    * Fetch user's recent finished games when on the idle screen
@@ -92,6 +176,8 @@ export const Game = () => {
       setError(null);
       setSelectedDigit(null);
       setFeedback(null);
+      setImageLoading(true);
+      setImageError(false);
 
       const response = await client.post('/game/start');
       setGameData(response.data);
@@ -179,6 +265,8 @@ export const Game = () => {
             }));
             setSelectedDigit(null);
             setIsSubmitting(false);
+            setImageLoading(true);
+            setImageError(false);
 
             // Publish round:start event for the next round
             gameEvents.emit('round:start', {
@@ -263,7 +351,7 @@ export const Game = () => {
       {/* 2. LOADING STATE */}
       {gameState === 'loading' && (
         <div className="py-24 text-center space-y-4">
-          <div className="w-12 h-12 border-3 border-banana border-t-transparent rounded-full animate-spin mx-auto" />
+          <Spinner size="lg" className="mx-auto" />
           <p className="font-ui text-base font-bold text-text uppercase tracking-wider">
             Fetching puzzle from Banana API...
           </p>
@@ -272,95 +360,117 @@ export const Game = () => {
 
       {/* 3. PLAYING STATE */}
       {gameState === 'playing' && gameData && (
-        <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center p-4 sm:p-6">
-          <div className="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+        <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Top error banner spanning full width if present */}
             {error && (
-              <div className="p-4 rounded-xl bg-red-950/80 border border-red-800 text-sm text-red-200 flex items-center justify-between">
-                <span>{error}</span>
-                <button
-                  type="button"
+              <div className="order-0 col-span-full p-4 rounded-xl bg-coral/10 border border-coral/30 text-sm text-coral flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 shrink-0 text-coral" aria-hidden="true" />
+                  <span>{error}</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setError(null)}
-                  className="text-xs text-red-400 hover:text-red-200 ml-4 font-semibold cursor-pointer"
+                  className="text-coral hover:text-white"
                 >
                   Dismiss
-                </button>
+                </Button>
               </div>
             )}
 
-            {/* Decoupled Live Score HUD (consumes gameEvents with zero props from Game) */}
-            <ScoreHud />
-
-            {/* Header: Timer */}
-            <div className="space-y-3 pb-4 border-b border-slate-800">
-              <Timer
-                round={gameData.round}
-                onTimeout={handleTimeout}
-                isActive={!isSubmitting && feedback === null}
-                duration={30}
-              />
-            </div>
-
-            {/* Answer Result Micro-Feedback */}
-            {feedback && (
-              <div
-                className={`p-3.5 rounded-xl border text-center text-sm font-bold shadow-md transition-all ${
-                  feedback.correct
-                    ? 'bg-emerald-950/90 border-emerald-500/70 text-emerald-300'
-                    : 'bg-red-950/90 border-red-500/70 text-red-300'
-                }`}
-              >
-                {feedback.isTimeout
-                  ? 'Time Ran Out! 0 points awarded'
-                  : feedback.correct
-                  ? `Correct! +${feedback.points} points awarded`
-                  : 'Incorrect! 0 points awarded'}
-              </div>
-            )}
-
-            {/* Puzzle Question Image Container */}
-            <div className="w-full bg-slate-950 rounded-xl p-3 border border-slate-800 flex items-center justify-center min-h-[220px]">
-              <img
-                src={gameData.question}
-                alt={`Banana Puzzle Round ${gameData.round}`}
-                className="max-h-72 w-auto object-contain rounded-lg shadow-md"
-              />
-            </div>
-
-            {/* Selection Status */}
-            <div className="text-center">
-              <span className="text-xs text-slate-400">Selected Answer: </span>
-              {selectedDigit !== null ? (
-                <span className="inline-block px-3 py-1 ml-1 rounded-lg bg-yellow-400 text-slate-950 font-black font-mono text-sm">
-                  {selectedDigit}
+            {/* Left Column (Desktop: ~60% col-span-7; Mobile: Order 4) */}
+            <div className="order-4 lg:order-1 lg:col-span-7 flex flex-col gap-2">
+              {/* Header strip */}
+              <div className="flex items-center justify-between px-1 font-ui uppercase tracking-wider">
+                <span className="text-xs sm:text-sm font-bold text-banana">
+                  ROUND {gameData.round}
                 </span>
-              ) : (
-                <span className="text-xs text-slate-500 italic">Press 0–9 or click below</span>
-              )}
-            </div>
-
-            {/* Digit Selection Keypad */}
-            <div>
-              <DigitPad
-                selectedDigit={selectedDigit}
-                onSelectDigit={(digit) => !isSubmitting && !feedback && setSelectedDigit(digit)}
-                disabled={isSubmitting || feedback !== null}
-              />
-            </div>
-
-            {/* Action Footer: Submit and Keyboard Tips */}
-            <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-800">
-              <div className="text-xs text-slate-400">
-                Keyboard: keys <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-yellow-400 font-mono font-bold">0-9</kbd> select, <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-yellow-400 font-mono font-bold">Enter</kbd> submits
+                <span className="text-xs text-muted font-medium">
+                  Find the banana's value
+                </span>
               </div>
 
-              <button
-                type="button"
-                disabled={selectedDigit === null || isSubmitting || feedback !== null}
-                onClick={() => handleSubmitAnswer()}
-                className="w-full sm:w-auto px-7 py-2.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-black text-sm shadow-md transition transform active:scale-95 cursor-pointer"
-              >
-                {isSubmitting ? 'Evaluating...' : 'Submit Answer'}
-              </button>
+              {/* Dark bezel with banana-tinted border and low-intensity glow */}
+              <div className="w-full bg-raised border border-banana/25 rounded-2xl p-3 sm:p-4 shadow-glow-banana">
+                <div className="w-full bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 flex items-center justify-center overflow-hidden min-h-[260px] sm:min-h-[360px]">
+                  {imageLoading && (
+                    <Skeleton className="w-full h-64 sm:h-80 md:h-96 rounded-xl bg-slate-200" />
+                  )}
+                  {imageError ? (
+                    <div className="p-6 text-center text-coral space-y-2">
+                      <AlertCircle className="w-8 h-8 mx-auto text-coral" />
+                      <p className="font-ui font-semibold text-sm">Failed to load puzzle image.</p>
+                    </div>
+                  ) : (
+                    <img
+                      key={gameData.question}
+                      src={gameData.question}
+                      alt={`Banana Puzzle Round ${gameData.round}`}
+                      className={`w-full max-h-[460px] object-contain block mx-auto select-none transition-opacity duration-150 ${
+                        imageLoading ? 'hidden' : 'block'
+                      }`}
+                      onLoad={() => setImageLoading(false)}
+                      onError={() => {
+                        setImageLoading(false);
+                        setImageError(true);
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column (Desktop: ~40% col-span-5 flex-col; Mobile: contents ordered into single column) */}
+            <div className="contents lg:flex lg:flex-col lg:col-span-5 lg:gap-6 lg:order-2">
+              {/* 1. HUD (Score, Round, Streak) */}
+              <div className="order-1 lg:order-none">
+                <ScoreHud />
+              </div>
+
+              {/* 2. Timer (prominent digits + progress bar) */}
+              <div className="order-2 lg:order-none">
+                <Timer
+                  round={gameData.round}
+                  onTimeout={handleTimeout}
+                  isActive={!isSubmitting && feedback === null}
+                  duration={30}
+                />
+              </div>
+
+              {/* 3. Feedback Card (above puzzle on mobile, above keypad on desktop) */}
+              <AnimatePresence>
+                {feedback && (
+                  <div className="order-3 lg:order-none">
+                    <FeedbackCard feedback={feedback} />
+                  </div>
+                )}
+              </AnimatePresence>
+
+              {/* 4. DigitPad (includes Answer Display + Keypad + Keyboard hints) */}
+              <div className="order-5 lg:order-none">
+                <DigitPad
+                  selectedDigit={selectedDigit}
+                  onSelectDigit={(digit) => !isSubmitting && !feedback && setSelectedDigit(digit)}
+                  disabled={isSubmitting || feedback !== null}
+                />
+              </div>
+
+              {/* 5. Submit Button */}
+              <div className="order-6 lg:order-none">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="w-full"
+                  disabled={selectedDigit === null || isSubmitting || feedback !== null}
+                  loading={isSubmitting}
+                  onClick={() => handleSubmitAnswer()}
+                  leftIcon={<Send className="w-5 h-5" />}
+                >
+                  SUBMIT ANSWER
+                </Button>
+              </div>
             </div>
           </div>
         </div>

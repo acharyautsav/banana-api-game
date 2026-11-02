@@ -20,6 +20,8 @@
  * ============================================================================
  */
 import { useState, useEffect } from 'react';
+import { Trophy, Flame } from 'lucide-react';
+import { Card } from './ui/Card';
 import { gameEvents } from '../events/gameEvents';
 
 export const ScoreHud = () => {
@@ -104,77 +106,94 @@ export const ScoreHud = () => {
 
   return (
     <div
-      className="w-full bg-slate-950/80 backdrop-blur-sm border border-slate-800 rounded-xl p-3 sm:p-4 shadow-lg"
+      className="w-full grid grid-cols-3 gap-2 sm:gap-3"
       aria-label="Live Game Statistics HUD"
     >
-      <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
-        {/* 1. Live Score Display */}
-        <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-900/60 border border-slate-800/80">
-          <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">
-            Score
+      {/* 1. Score Chip */}
+      <Card bodyClassName="p-3 sm:p-4 flex flex-col justify-between h-full">
+        <span className="font-ui text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted">
+          Score
+        </span>
+        <div className="flex items-baseline gap-1 sm:gap-1.5 mt-1 sm:mt-2">
+          <Trophy
+            className="w-5 h-5 sm:w-6 sm:h-6 text-banana shrink-0 self-center"
+            aria-hidden="true"
+          />
+          <span className="font-ui font-bold text-2xl sm:text-3xl text-text leading-none">
+            {score}
           </span>
-          <div className="flex items-center gap-1 mt-0.5">
-            <span className="text-yellow-400 text-xs sm:text-sm">🏆</span>
-            <span className="text-base sm:text-xl font-black font-mono text-yellow-400">
-              {score}
-            </span>
-            <span className="text-[10px] text-slate-400 font-mono">pts</span>
-          </div>
-        </div>
-
-        {/* 2. Round Progress Display */}
-        <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-slate-900/60 border border-slate-800/80">
-          <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">
-            Round
+          <span className="font-ui text-[10px] sm:text-xs font-bold text-muted uppercase tracking-wider">
+            PTS
           </span>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <span className="text-indigo-400 text-xs sm:text-sm">🎯</span>
-            <span className="text-base sm:text-xl font-black font-mono text-white">
-              {round}
-            </span>
-            <span className="text-xs text-slate-500 font-mono">/</span>
-            <span className="text-xs text-slate-400 font-mono">{totalRounds}</span>
-          </div>
         </div>
+      </Card>
 
-        {/* 3. Streak Counter Display */}
+      {/* 2. Round Progress Chip */}
+      <Card bodyClassName="p-3 sm:p-4 flex flex-col justify-between h-full">
+        <span className="font-ui text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted">
+          Round
+        </span>
+        <div className="flex items-baseline gap-0.5 sm:gap-1 mt-1 sm:mt-2">
+          <span className="font-ui font-bold text-2xl sm:text-3xl text-text leading-none">
+            {round}
+          </span>
+          <span className="font-ui text-sm sm:text-base font-normal text-muted">
+            /{totalRounds}
+          </span>
+        </div>
+        {/* 5 progress pips */}
         <div
-          className={`flex flex-col items-center justify-center p-2 rounded-lg border transition-all ${
-            streak >= 2
-              ? 'bg-amber-950/50 border-amber-500/60 shadow-sm shadow-amber-500/20'
-              : 'bg-slate-900/60 border-slate-800/80'
-          }`}
+          className="grid grid-cols-5 gap-1 sm:gap-1.5 mt-2 sm:mt-2.5 w-full"
+          aria-label={`Round ${round} of ${totalRounds}`}
         >
-          <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">
-            Streak
-          </span>
-          <div className="flex items-center gap-1 mt-0.5">
-            <span
-              className={`text-xs sm:text-sm transition-transform ${
-                streak > 0 ? 'scale-110' : 'opacity-40 grayscale'
-              }`}
-            >
-              🔥
-            </span>
-            <span
-              className={`text-base sm:text-xl font-black font-mono ${
-                streak >= 2
-                  ? 'text-amber-400 animate-pulse'
-                  : streak === 1
-                  ? 'text-amber-300'
-                  : 'text-slate-400'
-              }`}
-            >
-              {streak}
-            </span>
-            {streak >= 3 && (
-              <span className="hidden sm:inline-block text-[9px] uppercase px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold ml-0.5">
-                On Fire!
-              </span>
-            )}
-          </div>
+          {Array.from({ length: totalRounds }).map((_, idx) => {
+            const step = idx + 1;
+            let pipColor = 'bg-line';
+            if (step < round) {
+              pipColor = 'bg-jungle';
+            } else if (step === round) {
+              pipColor = 'bg-banana shadow-glow-banana';
+            }
+            return (
+              <span
+                key={step}
+                className={`h-1.5 rounded-full transition-all duration-300 ${pipColor}`}
+              />
+            );
+          })}
         </div>
-      </div>
+      </Card>
+
+      {/* 3. Streak Counter Chip */}
+      <Card
+        className={`transition-all duration-200 ${
+          streak >= 2 ? 'border-banana-deep shadow-glow-banana' : ''
+        }`}
+        bodyClassName="p-3 sm:p-4 flex flex-col justify-between h-full"
+      >
+        <span className="font-ui text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted">
+          Streak
+        </span>
+        <div className="flex items-baseline gap-1 sm:gap-1.5 mt-1 sm:mt-2">
+          <Flame
+            className={`w-5 h-5 sm:w-6 sm:h-6 shrink-0 self-center transition-colors ${
+              streak >= 2
+                ? 'text-banana-deep fill-banana-deep'
+                : streak > 0
+                ? 'text-banana'
+                : 'text-muted'
+            }`}
+            aria-hidden="true"
+          />
+          <span
+            className={`font-ui font-bold text-2xl sm:text-3xl leading-none ${
+              streak >= 2 ? 'text-banana-deep' : 'text-text'
+            }`}
+          >
+            {streak}
+          </span>
+        </div>
+      </Card>
     </div>
   );
 };
