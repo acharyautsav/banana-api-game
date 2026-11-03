@@ -23,13 +23,13 @@ import { Loader2 } from 'lucide-react';
 
 const VARIANTS = {
   primary:
-    'bg-banana text-ink font-ui font-bold uppercase tracking-wide hover:bg-banana-hover hover:shadow-glow-banana hover:-translate-y-0.5 active:scale-[0.97] border border-banana-deep/40 shadow-sm',
+    'bg-banana text-ink font-ui font-bold uppercase tracking-wide hover:bg-banana-hover hover:shadow-glow-banana hover:-translate-y-0.5 active:scale-[0.97] border border-banana-deep/30 shadow-sm',
   secondary:
-    'bg-raised border border-line text-text font-ui font-semibold hover:border-banana/50 hover:text-white hover:-translate-y-0.5 active:scale-[0.97] shadow-sm',
+    'bg-raised border border-line text-text font-ui font-semibold hover:border-banana hover:text-ink hover:bg-surface hover:-translate-y-0.5 active:scale-[0.97] shadow-sm',
   ghost:
     'bg-transparent text-muted font-ui font-medium hover:bg-raised hover:text-text active:scale-[0.98]',
   danger:
-    'bg-coral/15 text-coral border border-coral/30 font-ui font-bold uppercase tracking-wide hover:bg-coral hover:text-ink hover:shadow-glow-coral hover:-translate-y-0.5 active:scale-[0.97]',
+    'bg-coral/10 text-coral border border-coral/30 font-ui font-bold uppercase tracking-wide hover:bg-coral hover:text-white hover:shadow-glow-coral hover:-translate-y-0.5 active:scale-[0.97]',
   // Legacy aliases
   play:
     'bg-banana text-ink font-ui font-bold uppercase tracking-wide hover:bg-banana-hover hover:shadow-glow-banana hover:-translate-y-0.5 active:scale-[0.97] border border-banana-deep/40',

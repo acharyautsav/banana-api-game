@@ -51,7 +51,7 @@ export const Navbar = () => {
   const isLinkActive = (path) => location.pathname === path;
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-ink/70 backdrop-blur-md border-b border-line shadow-lg shadow-black/40">
+    <header className="sticky top-0 z-50 w-full bg-surface/85 backdrop-blur-md border-b border-line shadow-[0_2px_12px_rgba(45,35,20,0.05)]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Left: Brand Logo & Desktop Navigation */}

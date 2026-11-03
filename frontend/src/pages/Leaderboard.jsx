@@ -152,7 +152,7 @@ export const Leaderboard = () => {
             <Button
               variant="ghost"
               size="md"
-              className="w-full text-text hover:text-white"
+              className="w-full text-text hover:text-ink"
               onClick={handleRetry}
             >
               Try again

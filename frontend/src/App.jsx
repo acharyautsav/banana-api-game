@@ -46,7 +46,7 @@ function App() {
                   color: 'var(--color-text)',
                   border: '1px solid var(--color-line)',
                   borderRadius: '0.75rem',
-                  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.8)',
+                  boxShadow: '0 10px 25px rgba(45, 35, 20, 0.12)',
                   padding: '12px 16px',
                   fontSize: '0.875rem',
                   fontFamily: 'var(--font-sans)',
@@ -65,7 +65,7 @@ function App() {
                   className: 'toast-game toast-error',
                   iconTheme: {
                     primary: 'var(--color-coral)',
-                    secondary: 'var(--color-text)',
+                    secondary: '#FFFFFF',
                   },
                 },
               }}

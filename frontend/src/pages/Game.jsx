@@ -373,7 +373,7 @@ export const Game = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => setError(null)}
-                  className="text-coral hover:text-white"
+                  className="text-coral hover:text-coral hover:bg-coral/20"
                 >
                   Dismiss
                 </Button>

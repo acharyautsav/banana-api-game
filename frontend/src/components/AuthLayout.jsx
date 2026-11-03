@@ -26,9 +26,9 @@ export const AuthLayout = ({ children }) => {
 
   return (
     <div className="flex-1 w-full flex items-center justify-center py-4 sm:py-8">
-      <div className="w-full flex rounded-3xl overflow-hidden border border-line/60 bg-surface/50 shadow-2xl backdrop-blur-sm min-h-[calc(100vh-10rem)]">
+      <div className="w-full flex rounded-3xl overflow-hidden border border-line bg-surface shadow-[0_8px_32px_rgba(45,35,20,0.06)] min-h-[calc(100vh-10rem)]">
         {/* Left Column: Brand Hero Panel (Hidden on screens below lg) */}
-        <div className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 xl:p-16 relative overflow-hidden bg-gradient-to-b from-surface via-surface to-ink border-r border-line/60">
+        <div className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 xl:p-16 relative overflow-hidden bg-gradient-to-b from-surface via-surface to-raised border-r border-line">
           {/* Subtle Radial Banana Ambient Glow */}
           <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full bg-banana/10 blur-3xl pointer-events-none" />
 
@@ -40,7 +40,7 @@ export const AuthLayout = ({ children }) => {
 
             <h1 className="font-display text-4xl xl:text-5xl font-black text-text uppercase tracking-wide leading-tight mb-4">
               SOLVE. RACE.{' '}
-              <span className="text-banana drop-shadow-[0_0_20px_var(--color-banana)]">
+              <span className="text-banana">
                 CLIMB.
               </span>
             </h1>

@@ -48,7 +48,7 @@ export const Card = ({
 
   return (
     <div
-      className={`bg-surface border border-line rounded-2xl text-text relative overflow-hidden shadow-lg ${glowClass} ${hoverClass} ${className}`}
+      className={`bg-surface border border-line rounded-2xl text-text relative overflow-hidden shadow-[0_4px_20px_-2px_rgba(45,35,20,0.05),0_2px_6px_-1px_rgba(45,35,20,0.03)] ${glowClass} ${hoverClass} ${className}`}
       {...props}
     >
       {/* Optional thin gradient line along top edge */}

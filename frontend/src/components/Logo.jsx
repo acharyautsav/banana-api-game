@@ -60,7 +60,7 @@ export const Logo = ({
           className={`font-display tracking-wider leading-none uppercase ${sizeConfig.text}`}
         >
           <span className="text-text">BANANA</span>{' '}
-          <span className="text-banana drop-shadow-[0_0_12px_var(--color-banana)]">
+          <span className="text-banana">
             PUZZLE
           </span>
         </span>
